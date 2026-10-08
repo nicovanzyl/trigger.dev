@@ -1831,11 +1831,9 @@ function ProjectSelector({
         button={
           <PopoverTrigger
             className={cn(
-              "group flex h-8 items-center rounded inset-ring-1 pl-2 transition-shadow duration-150 hover:bg-background-hover focus-custom",
+              "group flex h-8 items-center rounded pl-2 hover:bg-background-hover focus-custom",
               // Expanded arrangement also applies mid-drag (resting classes flip only on release).
-              isDragging || !isCollapsed
-                ? "justify-between inset-ring-grid-bright pr-1"
-                : "justify-center inset-ring-transparent pr-0.5",
+              isDragging || !isCollapsed ? "justify-between pr-1" : "justify-center pr-0.5",
               className
             )}
           >
