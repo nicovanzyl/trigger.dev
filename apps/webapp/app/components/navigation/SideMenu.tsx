@@ -861,7 +861,7 @@ function SectionHeaderMenu({ onCustomize }: { onCustomize: () => void }) {
     <Popover open={isOpen} onOpenChange={setOpen}>
       <PopoverCustomTrigger
         aria-label="Sidebar options"
-        className="flex size-4.5 items-center justify-center justify-items-center rounded p-0 text-text-dimmed hover:bg-surface-control hover:text-text-bright"
+        className="flex size-6 items-center justify-center justify-items-center rounded p-0 text-text-dimmed hover:bg-surface-control hover:text-text-bright"
       >
         <EllipsisHorizontalIcon className="size-4.5" />
       </PopoverCustomTrigger>
