@@ -107,7 +107,7 @@ export function buildSideMenuSections({
           activeIconColor: "text-aiPrompts",
           to: v3PromptsPath(organization, project, environment),
           dataAction: "prompts",
-          badge: <NewBadge />,
+          badge: <NewBadge className="text-xs leading-none" />,
         },
         {
           id: "models",
@@ -116,7 +116,7 @@ export function buildSideMenuSections({
           activeIconColor: "text-models",
           to: v3ModelsPath(organization, project, environment),
           dataAction: "models",
-          badge: <NewBadge />,
+          badge: <NewBadge className="text-xs leading-none" />,
         },
       ],
     });
@@ -136,7 +136,7 @@ export function buildSideMenuSections({
                 activeIconColor: "text-logs",
                 to: v3LogsPath(organization, project, environment),
                 dataAction: "logs",
-                badge: <AlphaBadge />,
+                badge: <AlphaBadge className="text-xs leading-none" />,
               } satisfies SideMenuItemConfig,
             ]
           : []),

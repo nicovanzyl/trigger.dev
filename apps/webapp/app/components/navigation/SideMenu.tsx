@@ -961,7 +961,7 @@ export function SideMenu({
                 inactiveIconColor="text-text-dimmed"
                 to={v3SessionsPath(organization, project, environment)}
                 data-action="sessions"
-                badge={<NewBadge />}
+                badge={<NewBadge className="text-xs leading-none" />}
                 isCollapsed={isCollapsed}
                 yieldActiveToFavorite
               />
@@ -973,7 +973,7 @@ export function SideMenu({
                   inactiveIconColor="text-text-dimmed"
                   to={v3WebhooksPath(organization, project, environment)}
                   data-action="webhooks"
-                  badge={<NewBadge />}
+                  badge={<NewBadge className="text-xs leading-none" />}
                   isCollapsed={isCollapsed}
                   yieldActiveToFavorite
                 />

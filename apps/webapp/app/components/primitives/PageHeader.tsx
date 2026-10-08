@@ -62,7 +62,7 @@ export function PageTitle({ title, backButton, accessory }: PageTitleProps) {
           <BreadcrumbIcon className="h-5" />
         </div>
       )}
-      <Header2 className="flex items-center gap-1">{title}</Header2>
+      <Header2 className="flex items-center gap-1 text-[0.90625rem]">{title}</Header2>
       {accessory !== undefined && (
         // ml-px optically evens the accessory against the title's tight text edge
         <span className="ml-px flex items-center">
