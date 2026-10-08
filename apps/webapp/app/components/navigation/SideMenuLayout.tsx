@@ -504,14 +504,14 @@ export function SideMenuScroll({
   return (
     <div
       className={cn(
-        "min-h-0 overflow-y-auto pt-2.5",
+        "min-h-0 overflow-y-auto py-1",
         layout.showReservedGutter
           ? "scrollbar-gutter-stable scrollbar-thumb-on-hover"
           : "scrollbar-none"
       )}
     >
       <div
-        className="mb-6 flex w-full flex-col gap-4 overflow-hidden"
+        className="flex w-full flex-col gap-4 overflow-hidden"
         style={{
           paddingLeft: SIDE_MENU_PAD_X,
           paddingRight: layout.showReservedGutter ? "0px" : SIDE_MENU_SCROLL_PAD_RIGHT,

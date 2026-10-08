@@ -417,7 +417,7 @@ export function SideMenu({
           </CollapsibleElement>
         </div>
         <div
-          className="border-b border-grid-bright pb-2.5 pt-1"
+          className="border-b border-grid-bright py-1"
           style={{ paddingLeft: SIDE_MENU_PAD_X, paddingRight: SIDE_MENU_PAD_X }}
         >
           <div className="w-full space-y-1">
