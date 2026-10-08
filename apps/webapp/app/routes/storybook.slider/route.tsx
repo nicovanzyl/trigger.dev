@@ -67,7 +67,7 @@ export default function Story_() {
     >
       <StorySection
         title="Settings variant"
-        description="Used on the account page. Drag for the value tooltip; the tick resets to the default."
+        description="Drag or focus the thumb for its value. Arrow keys move one step; Shift + arrow or Page Up/Down move ten. Home/End jump to the limits. Tab to the tick and press Enter or Space to reset."
       >
         <StoryGrid min="16rem">
           <Story label="Plain">
@@ -83,7 +83,17 @@ export default function Story_() {
             <SettingsSlider min={15} initial={30} withTooltip withMark />
           </Story>
           <Story label="Disabled">
-            <SettingsSlider disabled />
+            <SettingsSlider disabled withTooltip withMark />
+          </Story>
+          <Story label="Uncontrolled, 5% steps">
+            <Slider
+              variant="settings"
+              className="w-44"
+              aria-label="Uncontrolled setting"
+              defaultValue={[40]}
+              step={5}
+              valueTooltip={(value) => `${value}%`}
+            />
           </Story>
         </StoryGrid>
       </StorySection>
