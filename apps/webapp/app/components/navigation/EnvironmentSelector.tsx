@@ -79,13 +79,13 @@ export function EnvironmentSelector({
         button={
           <PopoverTrigger
             className={cn(
-              "group flex h-8 items-center rounded pl-1.75 hover:bg-background-hover focus-custom",
+              "group flex h-8 items-center rounded pl-2 hover:bg-background-hover focus-custom",
               // Expanded arrangement also applies mid-drag (resting classes flip only on release).
               isDragging || !isCollapsed ? "justify-between pr-1" : "justify-center pr-0.5",
               className
             )}
           >
-            <span className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
+            <span className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
               <EnvironmentIcon environment={environment} className="size-5 shrink-0" />
               {/*
                 In the side menu, opacity + max-width follow --sm-label-opacity (1 → 0): the label

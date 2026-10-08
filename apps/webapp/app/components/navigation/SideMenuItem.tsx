@@ -124,7 +124,7 @@ export function SideMenuItem({
       target={target}
       data-action={dataAction}
       className={cn(
-        "group/menulink flex h-8 items-center gap-2 overflow-hidden rounded pl-1.75 pr-2 focus-custom",
+        "group/menulink flex h-8 items-center gap-2 overflow-hidden rounded pl-2 pr-2 focus-custom",
         isIndented ? "min-w-0 flex-1" : "w-full",
         isActive
           ? "bg-tertiary text-text-bright"
@@ -258,7 +258,7 @@ export const SideMenuItemButton = forwardRef<
       ref={ref}
       type={type ?? "button"}
       className={cn(
-        "group/menuitem flex h-8 w-full items-center gap-2 overflow-hidden rounded pl-1.75 pr-2 text-left text-text-dimmed hover:bg-background-hover hover:text-text-bright focus-custom",
+        "group/menuitem flex h-8 w-full items-center gap-2 overflow-hidden rounded pl-2 pr-2 text-left text-text-dimmed hover:bg-background-hover hover:text-text-bright focus-custom",
         className
       )}
       {...props}

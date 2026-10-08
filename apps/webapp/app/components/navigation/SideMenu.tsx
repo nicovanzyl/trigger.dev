@@ -192,8 +192,8 @@ const EXPAND_SNAP_THRESHOLD = 0.9;
 /** Pointer travel (px) below which a press on the handle counts as a click (toggle), not a drag. */
 const DRAG_CLICK_THRESHOLD = 4;
 
-/** Left/right padding of the pinned top section + scroll body, interpolated 10px → 4px by --sm-collapse. */
-const SIDE_MENU_PAD_X = `calc(0.625rem - 0.375rem * var(--sm-collapse, 0))`;
+/** Match the organization row's 4px inset in both expanded and collapsed layouts. */
+const SIDE_MENU_PAD_X = "0.25rem";
 /**
  * Scroll-body right padding DURING a transition (settled-open uses the reserved gutter instead).
  * Interpolates from the measured gutter width (seamless handoff) to 4px collapsed; the 8px fallback
@@ -1250,7 +1250,7 @@ function SideMenuMoreItem({
     <Popover open={isOpen} onOpenChange={setOpen}>
       <SimpleTooltip
         button={
-          <PopoverTrigger className="flex h-8 w-full items-center gap-2 overflow-hidden rounded pl-1.75 pr-2 text-text-dimmed hover:bg-background-hover hover:text-text-bright focus-custom data-[state=open]:bg-background-hover data-[state=open]:text-text-bright">
+          <PopoverTrigger className="flex h-8 w-full items-center gap-2 overflow-hidden rounded pl-2 pr-2 text-text-dimmed hover:bg-background-hover hover:text-text-bright focus-custom data-[state=open]:bg-background-hover data-[state=open]:text-text-bright">
             <EllipsisHorizontalIcon className="size-5 shrink-0" />
             <SideMenuLabel
               className="min-w-0 flex-1 select-none text-left text-[0.90625rem] font-medium tracking-[-0.01em]"
@@ -1466,12 +1466,12 @@ function OrgSelector({
         button={
           <PopoverTrigger
             className={cn(
-              "group flex h-8 items-center rounded pl-1.75 hover:bg-background-hover focus-custom",
+              "group flex h-8 items-center rounded pl-2 hover:bg-background-hover focus-custom",
               // Expanded arrangement also applies mid-drag (resting classes flip only on release).
               isDragging || !isCollapsed ? "w-full justify-between pr-1" : "justify-center pr-0.5"
             )}
           >
-            <span className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
+            <span className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
               <Avatar avatar={organization.avatar} size={1.25} orgName={organization.title} />
               <span
                 className="flex min-w-0 items-center gap-1.5 overflow-hidden"
@@ -1818,15 +1818,15 @@ function ProjectSelector({
         button={
           <PopoverTrigger
             className={cn(
-              "group flex h-8 items-center rounded border pl-1.75 transition-[border-color] duration-150 hover:bg-background-hover focus-custom",
+              "group flex h-8 items-center rounded inset-ring-1 pl-2 transition-shadow duration-150 hover:bg-background-hover focus-custom",
               // Expanded arrangement also applies mid-drag (resting classes flip only on release).
               isDragging || !isCollapsed
-                ? "justify-between border-grid-bright pr-1"
-                : "justify-center border-transparent pr-0.5",
+                ? "justify-between inset-ring-grid-bright pr-1"
+                : "justify-center inset-ring-transparent pr-0.5",
               className
             )}
           >
-            <span className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
+            <span className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
               <FolderOpenIcon className="size-5 shrink-0 text-text-bright" />
               <span
                 className="flex min-w-0 items-center overflow-hidden"
