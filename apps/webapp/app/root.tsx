@@ -13,6 +13,7 @@ import tailwindStylesheetUrl from "~/tailwind.css?url";
 import { RouteErrorDisplay } from "./components/ErrorDisplay";
 import { DisconnectedBanner } from "./components/DisconnectedBanner";
 import { GlobalShortcuts } from "./components/GlobalShortcuts";
+import { DevGridOverlay } from "./components/DevGridOverlay";
 import { StaleAssetRecovery } from "./components/StaleAssetRecovery";
 import { AppContainer, MainCenteredContainer } from "./components/layout/AppLayout";
 import { ShortcutsProvider } from "./components/primitives/ShortcutsProvider";
@@ -236,6 +237,7 @@ export default function App() {
         <ShortcutsProvider>
           <TimezoneSetter />
           <GlobalShortcuts />
+          {import.meta.env.DEV && <DevGridOverlay />}
           <Outlet />
           <DisconnectedBanner />
           <Toast />
