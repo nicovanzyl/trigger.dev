@@ -1,3 +1,10 @@
+import {
+  SIDE_MENU_PAD_X,
+  SideMenuShell,
+  SideMenuScroll,
+  SideMenuFooterControls,
+  useSideMenuLayout,
+} from "./SideMenuLayout";
 import { ArrowTopRightOnSquareIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { EllipsisHorizontalIcon } from "@heroicons/react/20/solid";
 import {
@@ -9,17 +16,8 @@ import {
   useSubmit,
 } from "@remix-run/react";
 import { WebhookIcon } from "~/assets/icons/WebhookIcon";
-import { LayoutGroup, motion } from "framer-motion";
-import {
-  type CSSProperties,
-  Fragment,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { motion } from "framer-motion";
+import { Fragment, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { AIChatIcon } from "~/assets/icons/AIChatIcon";
 import { ArrowLeftRightIcon } from "~/assets/icons/ArrowLeftRightIcon";
 import { ArrowRightSquareIcon } from "~/assets/icons/ArrowRightSquareIcon";
@@ -33,8 +31,6 @@ import { FolderClosedIcon } from "~/assets/icons/FolderClosedIcon";
 import { FolderOpenIcon } from "~/assets/icons/FolderOpenIcon";
 import { HomeIcon } from "~/assets/icons/HomeIcon";
 import { IntegrationsIcon } from "~/assets/icons/IntegrationsIcon";
-import { LeftSideMenuCollapsedIcon } from "~/assets/icons/LeftSideMenuCollapsedIcon";
-import { LeftSideMenuIcon } from "~/assets/icons/LeftSideMenuIcon";
 import { PlusIcon } from "~/assets/icons/PlusIcon";
 import { RunsIcon } from "~/assets/icons/RunsIcon";
 import { ShieldIcon } from "~/assets/icons/ShieldIcon";
@@ -57,7 +53,6 @@ import { useFeatureFlags } from "~/hooks/useFeatureFlags";
 import { useFeatures } from "~/hooks/useFeatures";
 import { type MatchedOrganization } from "~/hooks/useOrganizations";
 import { type MatchedProject } from "~/hooks/useProject";
-import { useShortcutKeys } from "~/hooks/useShortcutKeys";
 import { useShowSelfServe } from "~/hooks/useShowSelfServe";
 import { useHasAdminAccess, useIsViewingAsUser } from "~/hooks/useUser";
 import { type UserWithDashboardPreferences } from "~/models/user.server";
@@ -118,7 +113,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../primitives/Tooltip";
-import { ShortcutsAutoOpen } from "../Shortcuts";
 import { type FavoritePage } from "~/services/dashboardPreferences.server";
 import { AppearanceMenuItem } from "./AppearanceMenuItem";
 import {
@@ -137,7 +131,6 @@ import {
   useFavorites,
 } from "./favoritePages";
 import { FavoriteMenuItem } from "./FavoritesSection";
-import { HelpAndFeedback } from "./HelpAndFeedbackPopover";
 import { NotificationPanel } from "./NotificationPanel";
 import { SideMenuHeader } from "./SideMenuHeader";
 import { SideMenuItem, SideMenuLabel } from "./SideMenuItem";
@@ -167,39 +160,6 @@ const IMPERSONATION_ACCENT = {
   text: "text-yellow-500/80",
 };
 
-// --- Resizable side menu -----------------------------------------------------
-// A drag handle on the right edge resizes the menu. Width-driven visuals read two CSS variables
-// written to the root each frame (no React re-render, so drags stay smooth):
-//   --sm-collapse:      0 (>= default width) → 1 (collapsed)
-//   --sm-label-opacity: 1 → 0, a faster fade curve of --sm-collapse
-
-/** Collapsed rail width in px (matches the previous `w-11`). */
-const COLLAPSED_WIDTH = 44;
-/** The default/again-expanded width in px (matches the previous `w-56`). */
-const DEFAULT_WIDTH = 224;
-/** The widest the menu can be dragged, in px. */
-const MAX_WIDTH = 400;
-/** Duration of the collapse/expand/snap animation, in ms. */
-const COLLAPSE_ANIM_MS = 200;
-/** Fraction of the collapse range over which labels fade to 0 (0.6 = fully faded at 60% collapsed). */
-const LABEL_FADE_FRACTION = 0.6;
-/**
- * Snap thresholds as collapse progress (0 = default, 1 = collapsed): release at <= threshold springs
- * open, past it collapses. Separate per direction so releasing early continues the gesture.
- */
-const COLLAPSE_SNAP_THRESHOLD = 0.25;
-const EXPAND_SNAP_THRESHOLD = 0.9;
-/** Pointer travel (px) below which a press on the handle counts as a click (toggle), not a drag. */
-const DRAG_CLICK_THRESHOLD = 4;
-
-/** Match the organization row's 4px inset in both expanded and collapsed layouts. */
-const SIDE_MENU_PAD_X = "0.25rem";
-/**
- * Scroll-body right padding DURING a transition (settled-open uses the reserved gutter instead).
- * Interpolates from the measured gutter width (seamless handoff) to 4px collapsed; the 4px fallback
- * is only for the first paint before `--sm-sb-gutter` is measured.
- */
-const SIDE_MENU_SCROLL_PAD_RIGHT = `calc(var(--sm-sb-gutter, 4px) - (var(--sm-sb-gutter, 4px) - 0.25rem) * var(--sm-collapse, 0))`;
 /**
  * Hover chevron: its 18px width follows --sm-label-opacity so an invisible chevron never holds width
  * mid-drag and pushes the row's clip edge into the icon. Opacity stays class-driven (hover-only).
@@ -216,47 +176,6 @@ const SIDE_MENU_SELECTOR_LABEL_STYLE = {
   maxWidth: "calc(var(--sm-label-opacity, 1) * 1000px)",
   opacity: "var(--sm-label-opacity, 1)",
 } as const;
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
-}
-
-/** Collapse progress (0 = at/above default width, 1 = collapsed) for a given px width. */
-function widthToProgress(width: number) {
-  return clamp((DEFAULT_WIDTH - width) / (DEFAULT_WIDTH - COLLAPSED_WIDTH), 0, 1);
-}
-
-/** Label opacity (1 → 0) for a given collapse progress, using the faster fade curve. */
-function progressToLabelOpacity(progress: number) {
-  return clamp((LABEL_FADE_FRACTION - progress) / LABEL_FADE_FRACTION, 0, 1);
-}
-
-/** cubic-bezier(0.4, 0, 0.2, 1) — standard easing for the rAF tween, matching the CSS transitions. */
-function easeStandard(t: number) {
-  // Solve the bezier for x = t, then return y. Control points: p1 = (0.4, 0), p2 = (0.2, 1).
-  const x1 = 0.4;
-  const y1 = 0;
-  const x2 = 0.2;
-  const y2 = 1;
-  const cx = 3 * x1;
-  const bx = 3 * (x2 - x1) - cx;
-  const ax = 1 - cx - bx;
-  const cy = 3 * y1;
-  const by = 3 * (y2 - y1) - cy;
-  const ay = 1 - cy - by;
-  const sampleX = (u: number) => ((ax * u + bx) * u + cx) * u;
-  const sampleY = (u: number) => ((ay * u + by) * u + cy) * u;
-  const sampleDerivativeX = (u: number) => (3 * ax * u + 2 * bx) * u + cx;
-  // Newton-Raphson to invert x(u) = t.
-  let u = t;
-  for (let i = 0; i < 6; i++) {
-    const x = sampleX(u) - t;
-    const dx = sampleDerivativeX(u);
-    if (Math.abs(x) < 1e-4 || Math.abs(dx) < 1e-6) break;
-    u -= x / dx;
-  }
-  return sampleY(clamp(u, 0, 1));
-}
 
 type SideMenuUser = Pick<
   UserWithDashboardPreferences,
@@ -287,60 +206,15 @@ export function SideMenu({
   organization,
   organizations,
 }: SideMenuProps) {
-  const [isCollapsed, setIsCollapsed] = useState(
-    user.dashboardPreferences.sideMenu?.isCollapsed ?? false
-  );
-  const [isDragging, setIsDragging] = useState(false);
-  // True during a click/⌘B/release-snap animation. With isDragging, marks any in-flight transition
-  // (the gutter is only reserved once settled — see `showReservedGutter`).
-  const [isAnimating, setIsAnimating] = useState(false);
-  // Direction of an in-flight drag, for the Free-plan banner slide. A drag that started expanded is a
-  // close (the banner tracks it down); one that started collapsed is an open (the banner stays hidden
-  // until fully open, then rises). Only meaningful while `isDragging`.
-  const [dragStartedCollapsed, setDragStartedCollapsed] = useState(false);
-
-  // --- Resize state (see the module constants above) ---
-  const rootRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number | null>(null);
-  // Mirror of `isCollapsed` for the drag handlers (outside React's render cycle; no stale closures).
-  const isCollapsedRef = useRef(isCollapsed);
-  // Freeze first-paint values so React never fights the imperative width writes after hydration.
-  const [initialVisual] = useState(() => {
-    const collapsed = user.dashboardPreferences.sideMenu?.isCollapsed ?? false;
-    const expandedWidth = clamp(
-      user.dashboardPreferences.sideMenu?.width ?? DEFAULT_WIDTH,
-      DEFAULT_WIDTH,
-      MAX_WIDTH
-    );
-    const width = collapsed ? COLLAPSED_WIDTH : expandedWidth;
-    const progress = collapsed ? 1 : 0;
-
-    return {
-      expandedWidth,
-      width,
-      progress,
-      style: {
-        width,
-        "--sm-collapse": String(progress),
-        "--sm-label-opacity": String(progressToLabelOpacity(progress)),
-      } as CSSProperties,
-    };
-  });
-  // The last-committed expanded width; animation targets and re-expansion read from here.
-  const expandedWidthRef = useRef(initialVisual.expandedWidth);
-  const widthRef = useRef(initialVisual.width);
-  const progressRef = useRef(initialVisual.progress);
-  // Removes an in-flight drag's window listeners (set on pointerdown; cleared on finish/unmount).
-  const dragCleanupRef = useRef<(() => void) | null>(null);
-
-  const preferencesFetcher = useFetcher();
-  const pendingPreferencesRef = useRef<{
-    isCollapsed?: boolean;
-    width?: number;
-    sectionId?: SideMenuSectionId;
-    sectionCollapsed?: boolean;
-  }>({});
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const layout = useSideMenuLayout(user);
+  const {
+    isCollapsed,
+    isDragging,
+    isAnimating,
+    dragStartedCollapsed,
+    handleToggleCollapsed,
+    persistSideMenuPreferences,
+  } = layout;
   const currentPlan = useCurrentPlan();
   const { isConnected } = useDevPresence();
   const isFreeUser = currentPlan?.v3Subscription?.isPaying === false;
@@ -422,291 +296,6 @@ export function SideMenu({
     );
   };
 
-  const persistSideMenuPreferences = useCallback(
-    (data: {
-      isCollapsed?: boolean;
-      width?: number;
-      sectionId?: SideMenuSectionId;
-      sectionCollapsed?: boolean;
-    }) => {
-      if (user.isImpersonating) return;
-
-      // Merge with any pending changes
-      pendingPreferencesRef.current = {
-        ...pendingPreferencesRef.current,
-        ...data,
-      };
-
-      // Clear existing timeout
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-
-      // Debounce the actual submission by 500ms
-      debounceTimeoutRef.current = setTimeout(() => {
-        const pending = pendingPreferencesRef.current;
-        const formData = new FormData();
-        if (pending.isCollapsed !== undefined) {
-          formData.append("isCollapsed", String(pending.isCollapsed));
-        }
-        if (pending.width !== undefined) {
-          formData.append("width", String(pending.width));
-        }
-        if (pending.sectionId !== undefined && pending.sectionCollapsed !== undefined) {
-          formData.append("sectionId", pending.sectionId);
-          formData.append("sectionCollapsed", String(pending.sectionCollapsed));
-        }
-        preferencesFetcher.submit(formData, {
-          method: "POST",
-          action: "/resources/preferences/sidemenu",
-        });
-        pendingPreferencesRef.current = {};
-      }, 500);
-    },
-    [user.isImpersonating, preferencesFetcher]
-  );
-
-  // Flush routine in a ref so the unmount effect can have empty deps. `useFetcher` returns a fresh
-  // object each render, so depending on it would fire the cleanup (flushing the debounce) every
-  // render — and drags re-render constantly — instead of only on unmount.
-  const flushPendingPreferencesRef = useRef<() => void>();
-  // oxlint-disable-next-line react/refs -- This ref intentionally coordinates an imperative integration outside React state.
-  flushPendingPreferencesRef.current = () => {
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-    if (user.isImpersonating) return;
-    const pending = pendingPreferencesRef.current;
-    const hasPendingChanges =
-      pending.isCollapsed !== undefined ||
-      pending.width !== undefined ||
-      (pending.sectionId !== undefined && pending.sectionCollapsed !== undefined);
-    if (!hasPendingChanges) return;
-
-    const formData = new FormData();
-    if (pending.isCollapsed !== undefined) {
-      formData.append("isCollapsed", String(pending.isCollapsed));
-    }
-    if (pending.width !== undefined) {
-      formData.append("width", String(pending.width));
-    }
-    if (pending.sectionId !== undefined && pending.sectionCollapsed !== undefined) {
-      formData.append("sectionId", pending.sectionId);
-      formData.append("sectionCollapsed", String(pending.sectionCollapsed));
-    }
-    preferencesFetcher.submit(formData, {
-      method: "POST",
-      action: "/resources/preferences/sidemenu",
-    });
-    pendingPreferencesRef.current = {};
-  };
-
-  // Flush pending preferences on unmount. Empty deps so cleanup runs only on a real unmount
-  // (see flushPendingPreferencesRef).
-  useEffect(() => {
-    return () => flushPendingPreferencesRef.current?.();
-  }, []);
-
-  // Measure the reserved scrollbar-gutter width once and expose it as `--sm-sb-gutter` (the padding
-  // hands off to it seamlessly; platform-dependent, so it must be measured). A probe with the same
-  // scrollbar classes is measured so the value matches what that styling reserves.
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    const probe = document.createElement("div");
-    probe.className = "scrollbar-gutter-stable scrollbar-thumb-on-hover [--sm-sb-width:4px]";
-    probe.style.cssText =
-      "position:absolute;top:-9999px;left:-9999px;width:100px;height:100px;overflow-y:auto;visibility:hidden;";
-    document.body.appendChild(probe);
-    const gutter = probe.offsetWidth - probe.clientWidth;
-    document.body.removeChild(probe);
-    if (gutter > 0) el.style.setProperty("--sm-sb-gutter", `${gutter}px`);
-  }, []);
-
-  // Write width + collapse vars straight to the DOM (no re-render) so drags stay smooth; all
-  // width-driven visuals (labels, headers, padding, dividers) read them.
-  const writeVisual = useCallback((width: number, progress: number) => {
-    widthRef.current = width;
-    progressRef.current = progress;
-    const el = rootRef.current;
-    if (!el) return;
-    el.style.width = `${width}px`;
-    el.style.setProperty("--sm-collapse", String(progress));
-    el.style.setProperty("--sm-label-opacity", String(progressToLabelOpacity(progress)));
-  }, []);
-
-  // Animate width + progress over COLLAPSE_ANIM_MS (toggle button, ⌘B shortcut, release-snap).
-
-  const animateTo = useCallback(
-    (targetWidth: number, targetProgress: number) => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-      const startWidth = widthRef.current;
-      const startProgress = progressRef.current;
-      if (startWidth === targetWidth && startProgress === targetProgress) {
-        setIsAnimating(false);
-        return;
-      }
-      setIsAnimating(true);
-      const startTime = performance.now();
-      const step = (now: number) => {
-        const t = clamp((now - startTime) / COLLAPSE_ANIM_MS, 0, 1);
-        const eased = easeStandard(t);
-        writeVisual(
-          startWidth + (targetWidth - startWidth) * eased,
-          startProgress + (targetProgress - startProgress) * eased
-        );
-        if (t < 1) {
-          rafRef.current = requestAnimationFrame(step);
-        } else {
-          rafRef.current = null;
-          writeVisual(targetWidth, targetProgress);
-          setIsAnimating(false);
-        }
-      };
-      rafRef.current = requestAnimationFrame(step);
-    },
-    [writeVisual]
-  );
-
-  // Collapse/expand to a resting state and remember it.
-  const applyCollapsed = useCallback(
-    (next: boolean) => {
-      isCollapsedRef.current = next;
-      setIsCollapsed(next);
-      persistSideMenuPreferences({ isCollapsed: next });
-      animateTo(next ? COLLAPSED_WIDTH : expandedWidthRef.current, next ? 1 : 0);
-    },
-    [animateTo, persistSideMenuPreferences]
-  );
-
-  const handleToggleCollapsed = useCallback(() => {
-    applyCollapsed(!isCollapsedRef.current);
-  }, [applyCollapsed]);
-
-  // Drag runs on window-level listeners so releasing anywhere finalizes it. (Pointer capture alone
-  // was unreliable: if the browser drops it mid-drag, the release never fires and the menu strands.)
-
-  const onHandlePointerDown = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      if (e.button !== 0) return;
-      e.preventDefault();
-      // Capture just quiets hover states while dragging; the drag doesn't depend on it.
-      try {
-        e.currentTarget.setPointerCapture(e.pointerId);
-      } catch {}
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-      // Grabbing the handle interrupts any in-flight collapse/expand; clear the flag so a drag that
-      // rests via writeVisual (not animateTo) doesn't strand it true and keep the gutter hidden.
-      setIsAnimating(false);
-      // Never allow two concurrent drags.
-      dragCleanupRef.current?.();
-
-      const drag = {
-        startX: e.clientX,
-        startWidth: rootRef.current?.getBoundingClientRect().width ?? widthRef.current,
-        startedCollapsed: isCollapsedRef.current,
-        didDrag: false,
-      };
-
-      const cleanup = () => {
-        window.removeEventListener("pointermove", onMove);
-        window.removeEventListener("pointerup", onUp);
-        window.removeEventListener("pointercancel", onCancel);
-        window.removeEventListener("blur", onCancel);
-        document.body.style.userSelect = "";
-        document.body.style.cursor = "";
-        dragCleanupRef.current = null;
-      };
-
-      const onMove = (ev: PointerEvent) => {
-        const dx = ev.clientX - drag.startX;
-        if (!drag.didDrag) {
-          // Ignore tiny movement so a click still reads as a click (toggle), not a drag.
-          if (Math.abs(dx) < DRAG_CLICK_THRESHOLD) return;
-          drag.didDrag = true;
-          setIsDragging(true);
-          setDragStartedCollapsed(drag.startedCollapsed);
-          document.body.style.userSelect = "none";
-          document.body.style.cursor = "col-resize";
-        }
-        const width = clamp(drag.startWidth + dx, COLLAPSED_WIDTH, MAX_WIDTH);
-        writeVisual(width, widthToProgress(width));
-      };
-
-      const onUp = () => {
-        cleanup();
-        setIsDragging(false);
-
-        // A press with no meaningful drag toggles the menu.
-        if (!drag.didDrag) {
-          applyCollapsed(!isCollapsedRef.current);
-          return;
-        }
-
-        const width = widthRef.current;
-        // A drag that started collapsed is an opening gesture: flip the snap zone so an early
-        // release keeps opening.
-        const snapThreshold = drag.startedCollapsed
-          ? EXPAND_SNAP_THRESHOLD
-          : COLLAPSE_SNAP_THRESHOLD;
-        if (width >= DEFAULT_WIDTH) {
-          // Rest at the dragged width.
-          const rounded = Math.round(width);
-          expandedWidthRef.current = rounded;
-          isCollapsedRef.current = false;
-          setIsCollapsed(false);
-          persistSideMenuPreferences({ isCollapsed: false, width: rounded });
-          writeVisual(rounded, 0);
-        } else if (widthToProgress(width) <= snapThreshold) {
-          // Released near the default width — spring back open.
-          expandedWidthRef.current = DEFAULT_WIDTH;
-          isCollapsedRef.current = false;
-          setIsCollapsed(false);
-          persistSideMenuPreferences({ isCollapsed: false, width: DEFAULT_WIDTH });
-          animateTo(DEFAULT_WIDTH, 0);
-        } else {
-          // Released deeper in (or over-dragged past min width) — collapse the rest of the way.
-          isCollapsedRef.current = true;
-          setIsCollapsed(true);
-          persistSideMenuPreferences({ isCollapsed: true });
-          animateTo(COLLAPSED_WIDTH, 1);
-        }
-      };
-
-      const onCancel = () => {
-        cleanup();
-        setIsDragging(false);
-        if (!drag.didDrag) return;
-        // Settle back to the current resting state.
-        animateTo(
-          isCollapsedRef.current ? COLLAPSED_WIDTH : expandedWidthRef.current,
-          isCollapsedRef.current ? 1 : 0
-        );
-      };
-
-      window.addEventListener("pointermove", onMove);
-      window.addEventListener("pointerup", onUp);
-      window.addEventListener("pointercancel", onCancel);
-      window.addEventListener("blur", onCancel);
-      dragCleanupRef.current = cleanup;
-    },
-    [animateTo, applyCollapsed, persistSideMenuPreferences, writeVisual]
-  );
-
-  // Keep the drag handlers' collapsed mirror in sync; tear down any in-flight animation/drag on unmount.
-  useEffect(() => {
-    isCollapsedRef.current = isCollapsed;
-  }, [isCollapsed]);
-  useEffect(() => {
-    return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-      dragCleanupRef.current?.();
-    };
-  }, []);
-
   /** Generic handler for any collapsible section - just pass the section ID */
   const handleSectionToggle = useCallback(
     (sectionId: SideMenuSectionId) => (collapsed: boolean) => {
@@ -714,16 +303,6 @@ export function SideMenu({
     },
     [persistSideMenuPreferences]
   );
-
-  useShortcutKeys({
-    shortcut: { modifiers: ["mod"], key: "b", enabledOnInputElements: true },
-    action: handleToggleCollapsed,
-  });
-
-  // Reserve the scrollbar gutter only when fully settled open (stops the list shifting as it starts/
-  // stops overflowing). Dropped mid-transition so the right padding can animate instead of a fixed
-  // gutter snapping away (see SIDE_MENU_SCROLL_PAD_RIGHT).
-  const showReservedGutter = !isCollapsed && !isDragging && !isAnimating;
 
   // Free-plan banner slide (see FreePlanBanner). "tracking" = a close in progress, so the banner
   // follows --sm-collapse down and is gone by the halfway point; "hidden" = collapsed or an open in
@@ -817,25 +396,10 @@ export function SideMenu({
   ) : undefined;
 
   return (
-    <div
-      ref={rootRef}
-      style={initialVisual.style}
-      className={cn(
-        "relative h-full border-r bg-background-bright [--sm-sb-width:4px]",
-        // The accent is the loudest "you are not this user" tell, so "view as user" drops it too —
-        // the point of the mode is a dashboard that looks exactly like the user's. The account
-        // menu's "Exit Support Access" and the toggle itself stay on raw impersonation, so there is
-        // still a way back out (as does the ⌘⌥A shortcut in <GlobalShortcuts>).
-        user.isImpersonating && !isViewingAsUser
-          ? IMPERSONATION_ACCENT.border
-          : "border-grid-bright"
-      )}
+    <SideMenuShell
+      layout={layout}
+      className={user.isImpersonating && !isViewingAsUser ? IMPERSONATION_ACCENT.border : undefined}
     >
-      <ResizeHandle
-        isCollapsed={isCollapsed}
-        isDragging={isDragging}
-        onPointerDown={onHandlePointerDown}
-      />
       <div className="absolute inset-0 grid grid-cols-[100%] grid-rows-[3rem_auto_1fr_auto] overflow-hidden">
         <div className="flex min-w-0 items-center overflow-hidden border-b border-transparent px-1 py-1">
           <div className={cn("min-w-0", (isDragging || !isCollapsed) && "flex-1")}>
@@ -921,108 +485,91 @@ export function SideMenu({
             </div>
           </div>
         </div>
-        <div
-          className={cn(
-            "min-h-0 overflow-y-auto pt-2.5",
-            // Reserve the gutter only when settled open; during transitions it's dropped so the
-            // right padding below can animate the spacing seamlessly (see SIDE_MENU_SCROLL_PAD_RIGHT).
-            showReservedGutter
-              ? "scrollbar-gutter-stable scrollbar-thumb-on-hover"
-              : "scrollbar-none"
-          )}
-        >
-          <div
-            className="mb-6 flex w-full flex-col gap-4 overflow-hidden"
-            style={{
-              paddingLeft: SIDE_MENU_PAD_X,
-              paddingRight: showReservedGutter ? "0px" : SIDE_MENU_SCROLL_PAD_RIGHT,
-            }}
-          >
-            <div className="w-full space-y-0">
+        <SideMenuScroll layout={layout}>
+          <div className="w-full space-y-0">
+            <SideMenuItem
+              name="Tasks"
+              icon={TasksIcon}
+              activeIconColor="text-tasks"
+              inactiveIconColor="text-text-dimmed"
+              to={v3EnvironmentPath(organization, project, environment)}
+              data-action="tasks"
+              isCollapsed={isCollapsed}
+              yieldActiveToFavorite
+            />
+            <SideMenuItem
+              name="Runs"
+              icon={RunsIcon}
+              activeIconColor="text-runs"
+              inactiveIconColor="text-text-dimmed"
+              to={v3RunsPath(organization, project, environment)}
+              data-action="runs"
+              isCollapsed={isCollapsed}
+              yieldActiveToFavorite
+            />
+            <SideMenuItem
+              name="Sessions"
+              icon={AIChatIcon}
+              activeIconColor="text-sessions"
+              inactiveIconColor="text-text-dimmed"
+              to={v3SessionsPath(organization, project, environment)}
+              data-action="sessions"
+              badge={<NewBadge className="text-xs leading-none" />}
+              isCollapsed={isCollapsed}
+              yieldActiveToFavorite
+            />
+            {(user.admin || user.isImpersonating || featureFlags.hasWebhooksAccess) && (
               <SideMenuItem
-                name="Tasks"
-                icon={TasksIcon}
-                activeIconColor="text-tasks"
+                name="Webhooks"
+                icon={WebhookIcon}
+                activeIconColor="text-webhooks"
                 inactiveIconColor="text-text-dimmed"
-                to={v3EnvironmentPath(organization, project, environment)}
-                data-action="tasks"
-                isCollapsed={isCollapsed}
-                yieldActiveToFavorite
-              />
-              <SideMenuItem
-                name="Runs"
-                icon={RunsIcon}
-                activeIconColor="text-runs"
-                inactiveIconColor="text-text-dimmed"
-                to={v3RunsPath(organization, project, environment)}
-                data-action="runs"
-                isCollapsed={isCollapsed}
-                yieldActiveToFavorite
-              />
-              <SideMenuItem
-                name="Sessions"
-                icon={AIChatIcon}
-                activeIconColor="text-sessions"
-                inactiveIconColor="text-text-dimmed"
-                to={v3SessionsPath(organization, project, environment)}
-                data-action="sessions"
+                to={v3WebhooksPath(organization, project, environment)}
+                data-action="webhooks"
                 badge={<NewBadge className="text-xs leading-none" />}
                 isCollapsed={isCollapsed}
                 yieldActiveToFavorite
               />
-              {(user.admin || user.isImpersonating || featureFlags.hasWebhooksAccess) && (
-                <SideMenuItem
-                  name="Webhooks"
-                  icon={WebhookIcon}
-                  activeIconColor="text-webhooks"
-                  inactiveIconColor="text-text-dimmed"
-                  to={v3WebhooksPath(organization, project, environment)}
-                  data-action="webhooks"
-                  badge={<NewBadge className="text-xs leading-none" />}
-                  isCollapsed={isCollapsed}
-                  yieldActiveToFavorite
-                />
-              )}
-            </div>
+            )}
+          </div>
 
-            {orderedSectionIds.map((sectionId) => {
-              if (sectionId === "favorites") {
-                if (favorites.length === 0) return null;
-                return (
-                  <FavoritesSideMenuSection
-                    key="favorites"
-                    favorites={favorites}
-                    hiddenItems={sideMenuPrefs?.hiddenItems}
-                    isCollapsed={isCollapsed}
-                    initialCollapsed={getSectionCollapsed(sideMenuPrefs, "favorites")}
-                    onCollapseToggle={handleSectionToggle("favorites")}
-                    headerMenu={sectionHeaderMenu}
-                    onCustomize={openCustomize}
-                    onRemoveFavorite={removeFavorite}
-                    onRenameFavorite={renameFavorite}
-                  />
-                );
-              }
-
-              const section = staticSections.find((s) => s.id === sectionId);
-              if (!section) return null;
-
+          {orderedSectionIds.map((sectionId) => {
+            if (sectionId === "favorites") {
+              if (favorites.length === 0) return null;
               return (
-                <CustomizableSideMenuSection
-                  key={section.id}
-                  section={section}
-                  itemOrder={sideMenuPrefs?.sectionItemOrder?.[section.id]}
+                <FavoritesSideMenuSection
+                  key="favorites"
+                  favorites={favorites}
                   hiddenItems={sideMenuPrefs?.hiddenItems}
                   isCollapsed={isCollapsed}
-                  initialCollapsed={getSectionCollapsed(sideMenuPrefs, section.id)}
-                  onCollapseToggle={handleSectionToggle(section.id)}
+                  initialCollapsed={getSectionCollapsed(sideMenuPrefs, "favorites")}
+                  onCollapseToggle={handleSectionToggle("favorites")}
                   headerMenu={sectionHeaderMenu}
                   onCustomize={openCustomize}
+                  onRemoveFavorite={removeFavorite}
+                  onRenameFavorite={renameFavorite}
                 />
               );
-            })}
-          </div>
-        </div>
+            }
+
+            const section = staticSections.find((s) => s.id === sectionId);
+            if (!section) return null;
+
+            return (
+              <CustomizableSideMenuSection
+                key={section.id}
+                section={section}
+                itemOrder={sideMenuPrefs?.sectionItemOrder?.[section.id]}
+                hiddenItems={sideMenuPrefs?.hiddenItems}
+                isCollapsed={isCollapsed}
+                initialCollapsed={getSectionCollapsed(sideMenuPrefs, section.id)}
+                onCollapseToggle={handleSectionToggle(section.id)}
+                headerMenu={sectionHeaderMenu}
+                onCustomize={openCustomize}
+              />
+            );
+          })}
+        </SideMenuScroll>
         <div>
           <NotificationPanel
             isCollapsed={isCollapsed}
@@ -1051,7 +598,7 @@ export function SideMenu({
               isCollapsed && "items-center"
             )}
           >
-            <HelpAndAI
+            <SideMenuFooterControls
               isCollapsed={isCollapsed}
               isDragging={isDragging}
               organizationId={organization.id}
@@ -1095,7 +642,7 @@ export function SideMenu({
           />
         )}
       </Dialog>
-    </div>
+    </SideMenuShell>
   );
 }
 
@@ -2073,183 +1620,5 @@ function FreePlanBanner({
         <FreePlanUsage to={to} percentage={percentage} />
       </div>
     </div>
-  );
-}
-
-function HelpAndAI({
-  isCollapsed,
-  isDragging,
-  organizationId,
-  projectId,
-  onToggleCollapsed,
-}: {
-  isCollapsed: boolean;
-  isDragging: boolean;
-  organizationId: string;
-  projectId: string;
-  onToggleCollapsed: () => void;
-}) {
-  return (
-    <LayoutGroup>
-      <div
-        className={cn(
-          "flex w-full",
-          isCollapsed ? "flex-col-reverse gap-1" : "items-center justify-between"
-        )}
-      >
-        <ShortcutsAutoOpen />
-        <HelpAndFeedback
-          isCollapsed={isCollapsed}
-          organizationId={organizationId}
-          projectId={projectId}
-        />
-        <CollapseMenuButton
-          isCollapsed={isCollapsed}
-          isDragging={isDragging}
-          onToggle={onToggleCollapsed}
-        />
-      </div>
-    </LayoutGroup>
-  );
-}
-
-function CollapseMenuButton({
-  isCollapsed,
-  isDragging = false,
-  onToggle,
-}: {
-  isCollapsed: boolean;
-  isDragging?: boolean;
-  onToggle: () => void;
-}) {
-  const [isHovering, setIsHovering] = useState(false);
-
-  return (
-    // Shrink-and-fade only while dragging CLOSED, where this sits beside Help & Feedback and would
-    // overlap it as the row narrows. Dragging OPEN it stays put: collapsed, this IS the expand
-    // affordance, and the 0->1 variable would make the icon grow from nothing. At rest: natural size.
-    <div
-      className={cn(isDragging && !isCollapsed && "pointer-events-none overflow-hidden")}
-      style={
-        isDragging && !isCollapsed
-          ? {
-              maxWidth: "calc(var(--sm-label-opacity, 1) * 32px)",
-              opacity: "var(--sm-label-opacity, 1)",
-            }
-          : undefined
-      }
-    >
-      <TooltipProvider disableHoverableContent>
-        <Tooltip delayDuration={isCollapsed ? 0 : 500}>
-          <TooltipTrigger asChild>
-            <span
-              className={cn("inline-flex h-8", isCollapsed && "w-full")}
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
-            >
-              <Button
-                variant="small-menu-item"
-                aria-label={isCollapsed ? "Expand side menu" : "Collapse side menu"}
-                onClick={onToggle}
-                fullWidth={isCollapsed}
-                className={cn("h-full w-8 pl-1.5 pr-2", isCollapsed && "justify-center")}
-              >
-                {isCollapsed ? (
-                  <LeftSideMenuCollapsedIcon
-                    className={cn(
-                      "size-4.5 transition-colors",
-                      isHovering ? "text-text-bright" : "text-text-dimmed"
-                    )}
-                  />
-                ) : (
-                  <LeftSideMenuIcon
-                    className={cn(
-                      "size-4.5 transition-colors",
-                      isHovering ? "text-text-bright" : "text-text-dimmed"
-                    )}
-                    hovered={isHovering}
-                  />
-                )}
-              </Button>
-            </span>
-          </TooltipTrigger>
-          <TooltipContent side="right" sideOffset={8} className="flex items-center gap-2 text-xs">
-            {isCollapsed ? "Expand" : "Collapse"}
-            <span className="flex items-center">
-              <ShortcutKey shortcut={{ modifiers: ["mod"] }} variant="medium/bright" />
-              <ShortcutKey shortcut={{ key: "b" }} variant="medium/bright" />
-            </span>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </div>
-  );
-}
-
-/**
- * Resize affordance straddling the menu's right border: hover reveals an indigo line, drag resizes,
- * click toggles collapsed/expanded, and the tooltip follows the pointer's Y. The strip extends 4px
- * past the edge, so the menu root deliberately has no overflow-hidden (only its inner grid does).
- */
-function ResizeHandle({
-  isCollapsed,
-  isDragging,
-  onPointerDown,
-}: {
-  isCollapsed: boolean;
-  isDragging: boolean;
-  onPointerDown: (e: ReactPointerEvent<HTMLDivElement>) => void;
-}) {
-  // Fully controlled so open never flips controlled/uncontrolled mid-interaction; open requests
-  // during a drag are dropped.
-  const [isTooltipOpen, setTooltipOpen] = useState(false);
-  // Pointer Y within the strip — anchors the tooltip beside the cursor, not the strip's center.
-  const [anchorY, setAnchorY] = useState(0);
-
-  return (
-    <TooltipProvider disableHoverableContent>
-      <Tooltip
-        delayDuration={500}
-        open={isTooltipOpen && !isDragging}
-        onOpenChange={(open) => setTooltipOpen(open && !isDragging)}
-      >
-        <TooltipTrigger asChild>
-          <div
-            role="separator"
-            aria-orientation="vertical"
-            aria-label="Resize side menu"
-            onPointerDown={onPointerDown}
-            onPointerMove={(e) => {
-              if (isDragging) return;
-              setAnchorY(Math.round(e.clientY - e.currentTarget.getBoundingClientRect().top));
-            }}
-            className="group/resize absolute inset-y-0 -right-1 z-30 w-2 cursor-col-resize touch-none"
-          >
-            <div
-              className={cn(
-                "pointer-events-none absolute inset-y-0 left-1/2 w-0.75 -translate-x-1/2 bg-indigo-500 opacity-0 transition-opacity duration-300",
-                isDragging ? "opacity-100" : "group-hover/resize:opacity-100"
-              )}
-            />
-          </div>
-        </TooltipTrigger>
-        <TooltipContent
-          side="right"
-          align="start"
-          alignOffset={anchorY - 22}
-          sideOffset={8}
-          className="flex flex-col gap-1 text-xs"
-        >
-          <span>Drag to resize</span>
-          <span className="flex items-center gap-1 text-text-dimmed">
-            {isCollapsed ? "Click to expand" : "Click to collapse"}
-            <span className="flex items-center">
-              <ShortcutKey shortcut={{ modifiers: ["mod"] }} variant="medium/bright" />
-              <ShortcutKey shortcut={{ key: "b" }} variant="medium/bright" />
-            </span>
-          </span>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
   );
 }
