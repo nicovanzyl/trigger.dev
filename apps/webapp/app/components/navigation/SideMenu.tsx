@@ -196,10 +196,10 @@ const DRAG_CLICK_THRESHOLD = 4;
 const SIDE_MENU_PAD_X = "0.25rem";
 /**
  * Scroll-body right padding DURING a transition (settled-open uses the reserved gutter instead).
- * Interpolates from the measured gutter width (seamless handoff) to 4px collapsed; the 8px fallback
+ * Interpolates from the measured gutter width (seamless handoff) to 4px collapsed; the 4px fallback
  * is only for the first paint before `--sm-sb-gutter` is measured.
  */
-const SIDE_MENU_SCROLL_PAD_RIGHT = `calc(var(--sm-sb-gutter, 8px) - (var(--sm-sb-gutter, 8px) - 0.25rem) * var(--sm-collapse, 0))`;
+const SIDE_MENU_SCROLL_PAD_RIGHT = `calc(var(--sm-sb-gutter, 4px) - (var(--sm-sb-gutter, 4px) - 0.25rem) * var(--sm-collapse, 0))`;
 /**
  * Hover chevron: its 18px width follows --sm-label-opacity so an invisible chevron never holds width
  * mid-drag and pushes the row's clip edge into the icon. Opacity stays class-driven (hover-only).
@@ -514,7 +514,7 @@ export function SideMenu({
     const el = rootRef.current;
     if (!el) return;
     const probe = document.createElement("div");
-    probe.className = "scrollbar-gutter-stable scrollbar-thumb-on-hover";
+    probe.className = "scrollbar-gutter-stable scrollbar-thumb-on-hover [--sm-sb-width:4px]";
     probe.style.cssText =
       "position:absolute;top:-9999px;left:-9999px;width:100px;height:100px;overflow-y:auto;visibility:hidden;";
     document.body.appendChild(probe);
@@ -821,7 +821,7 @@ export function SideMenu({
       ref={rootRef}
       style={initialVisual.style}
       className={cn(
-        "relative h-full border-r bg-background-bright",
+        "relative h-full border-r bg-background-bright [--sm-sb-width:4px]",
         // The accent is the loudest "you are not this user" tell, so "view as user" drops it too —
         // the point of the mode is a dashboard that looks exactly like the user's. The account
         // menu's "Exit Support Access" and the toggle itself stay on raw impersonation, so there is
@@ -886,7 +886,7 @@ export function SideMenu({
                               <DialogTrigger asChild>
                                 <Button
                                   variant="minimal/small"
-                                  className="aspect-square h-7 p-1"
+                                  className="aspect-square h-8 pl-1.5 pr-2"
                                   aria-label={
                                     isConnected === undefined
                                       ? "Dev server connection status"
@@ -1775,7 +1775,7 @@ function AccountMenu({ isAdmin, isImpersonating }: { isAdmin: boolean; isImperso
     <Popover onOpenChange={(open) => setIsOpen(open)} open={isOpen}>
       <SimpleTooltip
         button={
-          <PopoverTrigger className="group flex size-8 items-center justify-center rounded hover:bg-background-hover focus-custom">
+          <PopoverTrigger className="group flex size-8 items-center justify-center rounded pl-1.5 pr-2 hover:bg-background-hover focus-custom">
             <UserProfilePhoto className="size-4.5" />
           </PopoverTrigger>
         }
@@ -2154,7 +2154,7 @@ function CollapseMenuButton({
                 aria-label={isCollapsed ? "Expand side menu" : "Collapse side menu"}
                 onClick={onToggle}
                 fullWidth={isCollapsed}
-                className={cn("h-full", isCollapsed && "justify-center")}
+                className={cn("h-full w-8 pl-1.5 pr-2", isCollapsed && "justify-center")}
               >
                 {isCollapsed ? (
                   <LeftSideMenuCollapsedIcon

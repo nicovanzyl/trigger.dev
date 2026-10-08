@@ -210,7 +210,7 @@ export function SideMenuItem({
           // Fades with the labels via --sm-label-opacity (unset → fully visible).
           <div
             className={cn(
-              "absolute bottom-1 right-1 top-1 flex aspect-square items-center justify-center rounded",
+              "absolute bottom-1 right-[calc(0.5rem-(1.5rem-1.125rem)/2)] top-1 flex aspect-square items-center justify-center rounded",
               isActive
                 ? "group-hover/menuitem:bg-tertiary"
                 : "group-hover/menuitem:bg-background-hover"

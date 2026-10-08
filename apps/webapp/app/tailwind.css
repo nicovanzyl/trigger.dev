@@ -472,8 +472,8 @@
   transition: --sm-sb-thumb 200ms ease;
 
   &::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: var(--sm-sb-width, 8px);
+    height: var(--sm-sb-width, 8px);
   }
   &::-webkit-scrollbar-track {
     background: transparent;
@@ -481,7 +481,7 @@
   &::-webkit-scrollbar-thumb {
     background-color: var(--sm-sb-thumb);
     /* transparent border + padding-box clip = thinner thumb, inset from the channel edges */
-    border: 2px solid transparent;
+    border: calc(var(--sm-sb-width, 8px) / 4) solid transparent;
     border-radius: 9999px;
     background-clip: padding-box;
   }
