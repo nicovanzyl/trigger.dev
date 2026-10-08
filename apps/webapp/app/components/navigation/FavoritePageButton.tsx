@@ -85,9 +85,9 @@ export function FavoritePageButton({
             aria-pressed={isFavorited}
             LeadingIcon={
               isFavorited ? (
-                <StarIconSolid className="size-4 text-yellow-500" />
+                <StarIconSolid className="size-4.5 text-yellow-500" />
               ) : (
-                <StarIconOutline className="size-4 text-text-dimmed transition-colors group-hover/button:text-text-bright" />
+                <StarIconOutline className="size-4.5 text-text-dimmed transition-colors group-hover/button:text-text-bright" />
               )
             }
           />

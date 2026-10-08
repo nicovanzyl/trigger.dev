@@ -86,7 +86,7 @@ export function EnvironmentSelector({
             )}
           >
             <span className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
-              <EnvironmentIcon environment={environment} className="size-5 shrink-0" />
+              <EnvironmentIcon environment={environment} className="size-4.5 shrink-0" />
               {/*
                 In the side menu, opacity + max-width follow --sm-label-opacity (1 → 0): the label
                 fades in place and scales its width to 0 so it never holds width mid-drag. The
@@ -110,14 +110,14 @@ export function EnvironmentSelector({
               </span>
             </span>
             {/*
-              Chevron's 16px width follows --sm-label-opacity so an invisible span never holds width
+              Chevron's 18px width follows --sm-label-opacity so an invisible span never holds width
               mid-drag and pushes the row's clip edge into the icon.
             */}
             <span
               className="overflow-hidden opacity-0 group-hover:opacity-100"
-              style={{ maxWidth: "calc(var(--sm-label-opacity, 1) * 16px)" }}
+              style={{ maxWidth: "calc(var(--sm-label-opacity, 1) * 18px)" }}
             >
-              <DropdownIcon className="size-4 min-w-4 text-text-dimmed group-hover:text-text-bright" />
+              <DropdownIcon className="size-4.5 min-w-4.5 text-text-dimmed group-hover:text-text-bright" />
             </span>
           </PopoverTrigger>
         }

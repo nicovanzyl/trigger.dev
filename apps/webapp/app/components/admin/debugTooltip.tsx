@@ -12,7 +12,13 @@ import { useOptionalOrganization } from "~/hooks/useOrganizations";
 import { useOptionalProject } from "~/hooks/useProject";
 import { useHasAdminAccess, useUser } from "~/hooks/useUser";
 
-export function AdminDebugTooltip({ children }: { children?: React.ReactNode }) {
+export function AdminDebugTooltip({
+  children,
+  iconClassName = "size-5",
+}: {
+  children?: React.ReactNode;
+  iconClassName?: string;
+}) {
   // `useHasAdminAccess` already folds in impersonation and the "view as user"
   // toggle, so this one check is enough.
   const hasAdminAccess = useHasAdminAccess();
@@ -25,7 +31,7 @@ export function AdminDebugTooltip({ children }: { children?: React.ReactNode }) 
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger>
-          <ShieldCheckIcon className="size-5" />
+          <ShieldCheckIcon className={iconClassName} />
         </TooltipTrigger>
         {/* The copy controls below pass `hideTooltip` so their own tooltips don't fire
             Radix's global close and dismiss this panel. `pr-8` leaves room for the

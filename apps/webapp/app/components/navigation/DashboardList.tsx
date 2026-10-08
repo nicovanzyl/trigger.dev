@@ -188,7 +188,7 @@ function DashboardChildMenuItem({
       action={
         showDragHandle ? (
           <div className="sidebar-drag-handle flex h-full w-full cursor-grab items-center justify-center rounded text-text-dimmed opacity-0 group-hover/menuitem:opacity-100 hover:text-text-bright active:cursor-grabbing">
-            <GripVerticalIcon className="size-3.5" />
+            <GripVerticalIcon className="size-4.5" />
           </div>
         ) : undefined
       }

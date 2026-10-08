@@ -201,11 +201,11 @@ const SIDE_MENU_PAD_X = "0.25rem";
  */
 const SIDE_MENU_SCROLL_PAD_RIGHT = `calc(var(--sm-sb-gutter, 8px) - (var(--sm-sb-gutter, 8px) - 0.25rem) * var(--sm-collapse, 0))`;
 /**
- * Hover chevron: its 16px width follows --sm-label-opacity so an invisible chevron never holds width
+ * Hover chevron: its 18px width follows --sm-label-opacity so an invisible chevron never holds width
  * mid-drag and pushes the row's clip edge into the icon. Opacity stays class-driven (hover-only).
  */
 const SIDE_MENU_CHEVRON_STYLE = {
-  maxWidth: "calc(var(--sm-label-opacity, 1) * 16px)",
+  maxWidth: "calc(var(--sm-label-opacity, 1) * 18px)",
 } as const;
 /**
  * Selector row label (org/project/env): opacity follows --sm-label-opacity to fade both directions
@@ -894,7 +894,12 @@ export function SideMenu({
                                         ? "Dev server connected"
                                         : "Dev server not connected"
                                   }
-                                  LeadingIcon={<ConnectionIcon isConnected={isConnected} />}
+                                  LeadingIcon={
+                                    <ConnectionIcon
+                                      isConnected={isConnected}
+                                      className="size-4.5"
+                                    />
+                                  }
                                 />
                               </DialogTrigger>
                             </div>
@@ -1251,7 +1256,7 @@ function SideMenuMoreItem({
       <SimpleTooltip
         button={
           <PopoverTrigger className="flex h-8 w-full items-center gap-2 overflow-hidden rounded pl-2 pr-2 text-text-dimmed hover:bg-background-hover hover:text-text-bright focus-custom data-[state=open]:bg-background-hover data-[state=open]:text-text-bright">
-            <EllipsisHorizontalIcon className="size-5 shrink-0" />
+            <EllipsisHorizontalIcon className="size-4.5 shrink-0" />
             <SideMenuLabel
               className="min-w-0 flex-1 select-none text-left text-[0.90625rem] font-medium tracking-[-0.01em]"
               style={{ opacity: "var(--sm-label-opacity, 1)" }}
@@ -1311,7 +1316,7 @@ function SectionHeaderMenu({ onCustomize }: { onCustomize: () => void }) {
         aria-label="Sidebar options"
         className="flex size-4.5 items-center justify-center justify-items-center rounded p-0 text-text-dimmed hover:bg-surface-control hover:text-text-bright"
       >
-        <EllipsisHorizontalIcon className="size-3.5" />
+        <EllipsisHorizontalIcon className="size-4.5" />
       </PopoverCustomTrigger>
       <PopoverContent className="w-fit min-w-max p-0" align="start" sideOffset={4}>
         {/* flex-col blockifies the inline-block menu item, avoiding stray line-box space below */}
@@ -1380,7 +1385,7 @@ function V3DeprecationPanel({
           <SimpleTooltip
             button={
               <PopoverTrigger className="flex h-8! w-full items-center justify-center rounded border border-amber-500/30 bg-amber-500/15 transition-colors hover:border-amber-500/50 hover:bg-amber-500/25">
-                <ExclamationTriangleIcon className="size-5 text-amber-400" />
+                <ExclamationTriangleIcon className="size-4.5 text-amber-400" />
               </PopoverTrigger>
             }
             content="v3 is now deprecated"
@@ -1402,7 +1407,7 @@ function V3DeprecationContent() {
   return (
     <div className="flex flex-col gap-2 rounded border border-amber-500/30 bg-amber-500/10 p-2 pt-1.5">
       <div className="flex items-center gap-1 border-b border-amber-500/30 pb-1">
-        <ExclamationTriangleIcon className="size-4 text-amber-400" />
+        <ExclamationTriangleIcon className="size-4.5 text-amber-400" />
         <Paragraph variant="small/bright" className="text-amber-300">
           v3 is now deprecated
         </Paragraph>
@@ -1472,7 +1477,12 @@ function OrgSelector({
             )}
           >
             <span className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
-              <Avatar avatar={organization.avatar} size={1.25} orgName={organization.title} />
+              <Avatar
+                avatar={organization.avatar}
+                size={1.125}
+                letterSize={0.75}
+                orgName={organization.title}
+              />
               <span
                 className="flex min-w-0 items-center gap-1.5 overflow-hidden"
                 style={SIDE_MENU_SELECTOR_LABEL_STYLE}
@@ -1486,7 +1496,7 @@ function OrgSelector({
               className="overflow-hidden opacity-0 group-hover:opacity-100"
               style={SIDE_MENU_CHEVRON_STYLE}
             >
-              <DropdownIcon className="size-4 min-w-4 text-text-dimmed group-hover:text-text-bright" />
+              <DropdownIcon className="size-4.5 min-w-4.5 text-text-dimmed group-hover:text-text-bright" />
             </span>
           </PopoverTrigger>
         }
@@ -1617,7 +1627,10 @@ function OrgSelector({
             always-reachable menu on the rail). */}
         {isCollapsed && (
           <div className="border-t border-grid-bright p-1">
-            <SideMenuPopoverSubMenu title="Account" icon={<UserProfilePhoto className="size-5" />}>
+            <SideMenuPopoverSubMenu
+              title="Account"
+              icon={<UserProfilePhoto className="size-4.5" />}
+            >
               <AccountMenuItems isAdmin={isAdmin} isImpersonating={isImpersonating} />
             </SideMenuPopoverSubMenu>
           </div>
@@ -1763,7 +1776,7 @@ function AccountMenu({ isAdmin, isImpersonating }: { isAdmin: boolean; isImperso
       <SimpleTooltip
         button={
           <PopoverTrigger className="group flex size-8 items-center justify-center rounded hover:bg-background-hover focus-custom">
-            <UserProfilePhoto className="size-5" />
+            <UserProfilePhoto className="size-4.5" />
           </PopoverTrigger>
         }
         content="Account"
@@ -1827,7 +1840,7 @@ function ProjectSelector({
             )}
           >
             <span className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
-              <FolderOpenIcon className="size-5 shrink-0 text-text-bright" />
+              <FolderOpenIcon className="size-4.5 shrink-0 text-text-bright" />
               <span
                 className="flex min-w-0 items-center overflow-hidden"
                 style={SIDE_MENU_SELECTOR_LABEL_STYLE}
@@ -1841,7 +1854,7 @@ function ProjectSelector({
               className="overflow-hidden opacity-0 group-hover:opacity-100"
               style={SIDE_MENU_CHEVRON_STYLE}
             >
-              <DropdownIcon className="size-4 min-w-4 text-text-dimmed group-hover:text-text-bright" />
+              <DropdownIcon className="size-4.5 min-w-4.5 text-text-dimmed group-hover:text-text-bright" />
             </span>
           </PopoverTrigger>
         }
@@ -1947,14 +1960,14 @@ function Integrations({ organization }: { organization: MatchedOrganization }) {
           to={organizationVercelIntegrationPath(organization)}
           title="Vercel"
           icon={VercelLogo}
-          leadingIconClassName="size-4 text-text-dimmed"
+          leadingIconClassName="size-4.5 text-text-dimmed"
           className={SIDE_MENU_POPOVER_ITEM_LABEL}
         />
         <PopoverMenuItem
           to={organizationSlackIntegrationPath(organization)}
           title="Slack"
           icon={SlackIcon}
-          leadingIconClassName="size-4 text-text-dimmed"
+          leadingIconClassName="size-4.5 text-text-dimmed"
           className={SIDE_MENU_POPOVER_ITEM_LABEL}
         />
       </div>
@@ -2146,14 +2159,14 @@ function CollapseMenuButton({
                 {isCollapsed ? (
                   <LeftSideMenuCollapsedIcon
                     className={cn(
-                      "size-5 transition-colors",
+                      "size-4.5 transition-colors",
                       isHovering ? "text-text-bright" : "text-text-dimmed"
                     )}
                   />
                 ) : (
                   <LeftSideMenuIcon
                     className={cn(
-                      "size-5 transition-colors",
+                      "size-4.5 transition-colors",
                       isHovering ? "text-text-bright" : "text-text-dimmed"
                     )}
                     hovered={isHovering}

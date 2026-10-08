@@ -55,12 +55,15 @@ export function parseAvatar(json: Prisma.JsonValue, defaultAvatar: Avatar): Avat
 export function Avatar({
   avatar,
   size,
+  letterSize,
   includePadding,
   orgName,
 }: {
   avatar: Avatar;
   /** Size in rems of the icon */
   size: number;
+  /** Optional initials size in rems, independent of the avatar dimensions. */
+  letterSize?: number;
   includePadding?: boolean;
   orgName: string;
 }) {
@@ -72,6 +75,7 @@ export function Avatar({
         <AvatarLetters
           avatar={avatar}
           size={size}
+          letterSize={letterSize}
           includePadding={includePadding}
           orgName={orgName}
         />
@@ -148,11 +152,13 @@ function letterColorForBackground(hex: string): string {
 function AvatarLetters({
   avatar,
   size,
+  letterSize,
   includePadding,
   orgName,
 }: {
   avatar: LettersAvatar;
   size: number;
+  letterSize?: number;
   includePadding?: boolean;
   orgName: string;
 }) {
@@ -177,7 +183,7 @@ function AvatarLetters({
       >
         <span
           className="font-bold leading-none"
-          style={{ fontSize: `${size * 0.6 * scaleFactor}rem` }}
+          style={{ fontSize: `${letterSize ?? size * 0.6 * scaleFactor}rem` }}
         >
           {letters}
         </span>

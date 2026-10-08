@@ -73,7 +73,7 @@ export function HelpAndFeedback({
               )}
             >
               <span className="flex min-w-0 items-center gap-1.5 overflow-hidden">
-                <QuestionMarkIcon className="size-5 min-w-5 shrink-0 text-success" />
+                <QuestionMarkIcon className="size-4.5 min-w-4.5 shrink-0 text-success" />
                 {/*
                       Width + opacity follow --sm-label-opacity so the label tracks a drag both
                       directions (no CSS transition — it would lag the per-frame writes).
@@ -89,15 +89,15 @@ export function HelpAndFeedback({
                 </span>
               </span>
               {/*
-                    Hover chevron, only when expanded. Its 16px width follows --sm-label-opacity so
+                    Hover chevron, only when expanded. Its 18px width follows --sm-label-opacity so
                     an invisible chevron never holds width mid-drag and clips the help icon.
                   */}
               {!isCollapsed && (
                 <span
                   className="overflow-hidden opacity-0 group-hover:opacity-100"
-                  style={{ maxWidth: "calc(var(--sm-label-opacity, 1) * 16px)" }}
+                  style={{ maxWidth: "calc(var(--sm-label-opacity, 1) * 18px)" }}
                 >
-                  <DropdownIcon className="size-4 min-w-4 text-text-dimmed group-hover:text-text-bright" />
+                  <DropdownIcon className="size-4.5 min-w-4.5 text-text-dimmed group-hover:text-text-bright" />
                 </span>
               )}
             </PopoverTrigger>

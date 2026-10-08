@@ -68,7 +68,7 @@ export function PageTitle({ title, backButton, accessory }: PageTitleProps) {
         <span className="ml-px flex items-center">
           {typeof accessory === "string" ? (
             <SimpleTooltip
-              button={<QuestionMarkIcon className="size-4 text-text-dimmed" />}
+              button={<QuestionMarkIcon className="size-4.5 text-text-dimmed" />}
               content={accessory}
               className="max-w-xs"
               disableHoverableContent

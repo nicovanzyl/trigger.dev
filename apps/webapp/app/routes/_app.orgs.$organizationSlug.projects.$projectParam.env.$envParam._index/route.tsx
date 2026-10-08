@@ -387,11 +387,12 @@ export default function Page() {
       <NavBar>
         <PageTitle title="Tasks" accessory={<TasksHelpTooltip />} />
         <PageAccessories>
-          <AdminDebugTooltip />
+          <AdminDebugTooltip iconClassName="size-4.5" />
           <WhenAgentUnavailable>
             <LinkButton
               variant={"docs/small"}
               LeadingIcon={BookOpenIcon}
+              leadingIconClassName="size-4.5"
               to={docsPath("/tasks/overview")}
             >
               Task docs
@@ -915,7 +916,7 @@ function TasksHelpTooltip() {
   return (
     <SimpleTooltip
       button={
-        <QuestionMarkIcon className="size-4 text-text-dimmed transition hover:text-text-bright" />
+        <QuestionMarkIcon className="size-4.5 text-text-dimmed transition hover:text-text-bright" />
       }
       side="bottom"
       className="max-w-sm p-3"

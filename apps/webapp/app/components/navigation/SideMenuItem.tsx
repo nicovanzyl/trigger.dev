@@ -134,7 +134,7 @@ export function SideMenuItem({
       <Icon
         icon={icon}
         className={cn(
-          "size-5 shrink-0",
+          "size-4.5 shrink-0",
           // side-menu-active-icon: System themes neutralize the accent (see tailwind.css)
           isActive
             ? cn(activeIconColor, "side-menu-active-icon")
@@ -175,7 +175,7 @@ export function SideMenuItem({
           {trailingIcon && !isCollapsed && (
             <Icon
               icon={trailingIcon}
-              className={cn("ml-1 size-4 shrink-0", trailingIconClassName)}
+              className={cn("ml-1 size-4.5 shrink-0", trailingIconClassName)}
             />
           )}
         </div>
@@ -266,7 +266,7 @@ export const SideMenuItemButton = forwardRef<
       <Icon
         icon={icon}
         className={cn(
-          "size-5 shrink-0",
+          "size-4.5 shrink-0",
           iconClassName ?? "text-text-dimmed group-hover/menuitem:text-text-bright"
         )}
       />
