@@ -20,7 +20,7 @@ export function NavBar({ children }: WithChildren) {
 
   return (
     <div>
-      <div className="grid h-10 w-full grid-rows-[auto_1px] bg-background-bright">
+      <div className="grid h-12 w-full grid-rows-[auto_1px] bg-background-bright">
         <div className="flex w-full items-center gap-2 pl-3 pr-2">
           <div className="flex flex-1 items-center justify-between">{children}</div>
           <DashboardAgentLauncher />

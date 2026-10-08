@@ -836,7 +836,7 @@ export function SideMenu({
         isDragging={isDragging}
         onPointerDown={onHandlePointerDown}
       />
-      <div className="absolute inset-0 grid grid-cols-[100%] grid-rows-[2.5rem_auto_1fr_auto] overflow-hidden">
+      <div className="absolute inset-0 grid grid-cols-[100%] grid-rows-[3rem_auto_1fr_auto] overflow-hidden">
         <div className="flex min-w-0 items-center overflow-hidden border-b border-transparent px-1 py-1">
           <div className={cn("min-w-0", (isDragging || !isCollapsed) && "flex-1")}>
             <OrgSelector
