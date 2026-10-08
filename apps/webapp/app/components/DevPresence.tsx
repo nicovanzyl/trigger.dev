@@ -139,14 +139,20 @@ export function useCrossEngineIsConnected({
   return crossEngineIsConnected;
 }
 
-export function ConnectionIcon({ isConnected }: { isConnected: boolean | undefined }) {
+export function ConnectionIcon({
+  isConnected,
+  className = "size-5",
+}: {
+  isConnected: boolean | undefined;
+  className?: string;
+}) {
   if (isConnected === undefined) {
-    return <CheckingConnectionIcon className="size-5" />;
+    return <CheckingConnectionIcon className={className} />;
   }
   return isConnected ? (
-    <ConnectedIcon className="size-5" />
+    <ConnectedIcon className={className} />
   ) : (
-    <DisconnectedIcon className="size-5" />
+    <DisconnectedIcon className={className} />
   );
 }
 

@@ -61,7 +61,7 @@ export function SideMenuSection({
           // A real button for native keyboard toggle + focus ring. Out of the tab order when the
           // menu is collapsed (the header is hidden and can't be toggled). Hover styles key off
           // the wrapper group so the header stays highlighted while hovering the overlaid menu.
-          className="group/section flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-sm py-1 pl-1.5 pr-1 group-hover/sectionheader:bg-background-hover focus-custom"
+          className="group/section flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-sm py-1 pl-2 pr-1 group-hover/sectionheader:bg-background-hover focus-custom"
           onClick={isSideMenuCollapsed ? undefined : handleToggle}
           tabIndex={isSideMenuCollapsed ? -1 : undefined}
           aria-expanded={!isCollapsed}
@@ -73,6 +73,7 @@ export function SideMenuSection({
           <div className="flex items-center gap-1 text-text-dimmed group-hover/sectionheader:text-text-bright">
             <h2 className="whitespace-nowrap text-xs">{title}</h2>
             <motion.div
+              className="opacity-0 group-hover/sectionheader:opacity-100 group-focus-visible/section:opacity-100"
               initial={isCollapsed}
               animate={{ rotate: isCollapsed ? -90 : 0 }}
               transition={{ duration: 0.2 }}
@@ -87,7 +88,7 @@ export function SideMenuSection({
             // Outer div fades with the labels (inline style would defeat the hover opacity classes
             // on the inner div, so they're split).
             <div
-              className="absolute right-1 top-1/2 -translate-y-1/2"
+              className="absolute right-[calc(0.5rem-(1.5rem-1.125rem)/2)] top-1/2 -translate-y-1/2"
               style={{ opacity: "var(--sm-label-opacity, 1)" }}
             >
               {/* focus-within keeps the trigger visible for keyboard users tabbing onto it */}

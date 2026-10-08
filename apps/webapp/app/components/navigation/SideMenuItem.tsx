@@ -124,7 +124,7 @@ export function SideMenuItem({
       target={target}
       data-action={dataAction}
       className={cn(
-        "group/menulink flex h-8 items-center gap-2 overflow-hidden rounded pl-1.75 pr-2 focus-custom",
+        "group/menulink flex h-8 items-center gap-2 overflow-hidden rounded pl-2 pr-2 focus-custom",
         isIndented ? "min-w-0 flex-1" : "w-full",
         isActive
           ? "bg-tertiary text-text-bright"
@@ -134,7 +134,7 @@ export function SideMenuItem({
       <Icon
         icon={icon}
         className={cn(
-          "size-5 shrink-0",
+          "size-4.5 shrink-0",
           // side-menu-active-icon: System themes neutralize the accent (see tailwind.css)
           isActive
             ? cn(activeIconColor, "side-menu-active-icon")
@@ -175,7 +175,7 @@ export function SideMenuItem({
           {trailingIcon && !isCollapsed && (
             <Icon
               icon={trailingIcon}
-              className={cn("ml-1 size-4 shrink-0", trailingIconClassName)}
+              className={cn("ml-1 size-4.5 shrink-0", trailingIconClassName)}
             />
           )}
         </div>
@@ -210,7 +210,7 @@ export function SideMenuItem({
           // Fades with the labels via --sm-label-opacity (unset → fully visible).
           <div
             className={cn(
-              "absolute bottom-1 right-1 top-1 flex aspect-square items-center justify-center rounded",
+              "absolute bottom-1 right-[calc(0.5rem-(1.5rem-1.125rem)/2)] top-1 flex aspect-square items-center justify-center rounded",
               isActive
                 ? "group-hover/menuitem:bg-tertiary"
                 : "group-hover/menuitem:bg-background-hover"
@@ -258,7 +258,7 @@ export const SideMenuItemButton = forwardRef<
       ref={ref}
       type={type ?? "button"}
       className={cn(
-        "group/menuitem flex h-8 w-full items-center gap-2 overflow-hidden rounded pl-1.75 pr-2 text-left text-text-dimmed hover:bg-background-hover hover:text-text-bright focus-custom",
+        "group/menuitem flex h-8 w-full items-center gap-2 overflow-hidden rounded pl-2 pr-2 text-left text-text-dimmed hover:bg-background-hover hover:text-text-bright focus-custom",
         className
       )}
       {...props}
@@ -266,7 +266,7 @@ export const SideMenuItemButton = forwardRef<
       <Icon
         icon={icon}
         className={cn(
-          "size-5 shrink-0",
+          "size-4.5 shrink-0",
           iconClassName ?? "text-text-dimmed group-hover/menuitem:text-text-bright"
         )}
       />

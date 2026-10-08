@@ -94,7 +94,7 @@ export function CreateDashboardButton({
                 type="button"
                 className="flex h-full w-full items-center justify-center rounded text-text-dimmed focus-custom hover:bg-surface-control hover:text-text-bright"
               >
-                <PlusIcon className="size-4" />
+                <PlusIcon className="size-4.5" />
               </button>
             </DialogTrigger>
           </TooltipTrigger>

@@ -47,7 +47,7 @@ function SettingsChrome({
 
   return (
     <AppContainer>
-      <div className="grid grid-cols-[14rem_1fr] overflow-hidden">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] overflow-hidden">
         <OrganizationSettingsSideMenu
           organization={organization}
           buildInfo={buildInfo}

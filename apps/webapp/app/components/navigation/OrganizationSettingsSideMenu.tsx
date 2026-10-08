@@ -1,4 +1,4 @@
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { SettingsSideMenu } from "./SettingsSideMenu";
 import { BellIcon } from "~/assets/icons/BellIcon";
 import { ChainLinkIcon } from "~/assets/icons/ChainLinkIcon";
 import { CreditCardIcon } from "~/assets/icons/CreditCardIcon";
@@ -14,7 +14,6 @@ import { VercelLogo } from "~/components/integrations/VercelLogo";
 import { useFeatureFlags } from "~/hooks/useFeatureFlags";
 import { useFeatures } from "~/hooks/useFeatures";
 import { type MatchedOrganization } from "~/hooks/useOrganizations";
-import { cn } from "~/utils/cn";
 import {
   organizationPath,
   organizationProjectsPath,
@@ -30,8 +29,6 @@ import {
   v3PrivateConnectionsPath,
   v3UsagePath,
 } from "~/utils/pathBuilder";
-import { LinkButton } from "../primitives/Buttons";
-import { HelpAndFeedback } from "./HelpAndFeedbackPopover";
 import { SideMenuHeader } from "./SideMenuHeader";
 import { SideMenuItem } from "./SideMenuItem";
 import { useShowSelfServe } from "~/hooks/useShowSelfServe";
@@ -67,201 +64,222 @@ export function OrganizationSettingsSideMenu({
   const showBuildInfo = isAdmin || !isManagedCloud;
 
   return (
-    <div
-      className={cn(
-        "grid h-full grid-rows-[2.5rem_auto_2.5rem] overflow-hidden border-r border-grid-bright bg-background-bright transition"
-      )}
-    >
-      <div className={cn("flex items-center justify-between p-1 transition")}>
-        <LinkButton
-          variant="minimal/medium"
-          LeadingIcon={ArrowLeftIcon}
-          to={organizationPath(organization)}
-          fullWidth
-          textAlignLeft
-        >
-          <span className="text-text-bright">Back to app</span>
-        </LinkButton>
-      </div>
-      <div className="mb-6 flex grow flex-col gap-4 overflow-y-auto pl-2.5 pr-0 pt-2 scrollbar-gutter-stable scrollbar-thin scrollbar-track-transparent scrollbar-thumb-surface-control">
-        <div className="flex flex-col">
-          <div className="mb-1">
-            <SideMenuHeader title="Organization" />
-          </div>
-          <SideMenuItem
-            name="Settings"
-            icon={SlidersIcon}
-            activeIconColor="text-text-bright"
-            inactiveIconColor="text-text-dimmed"
-            to={organizationSettingsPath(organization)}
-            data-action="settings"
-          />
-          {isManagedCloud && (
-            <>
-              <SideMenuItem
-                name="Usage"
-                icon={UsageIcon}
-                activeIconColor="text-text-bright"
-                inactiveIconColor="text-text-dimmed"
-                to={v3UsagePath(organization)}
-                data-action="usage"
-              />
-              <SideMenuItem
-                name="Billing"
-                icon={CreditCardIcon}
-                activeIconColor="text-text-bright"
-                inactiveIconColor="text-text-dimmed"
-                to={v3BillingPath(organization)}
-                data-action="billing"
-                badge={
-                  currentPlan?.v3Subscription?.isPaying ? (
-                    <Badge variant="extra-small">{currentPlan?.v3Subscription?.plan?.title}</Badge>
-                  ) : undefined
-                }
-              />
-              {showSelfServe ? (
+    <SettingsSideMenu backTo={organizationPath(organization)} organizationId={organization.id}>
+      {(isCollapsed) => (
+        <>
+          <div className="flex flex-col">
+            <div className="mb-1">
+              <SideMenuHeader isCollapsed={isCollapsed} title="Organization" />
+            </div>
+            <SideMenuItem
+              isCollapsed={isCollapsed}
+              name="Settings"
+              icon={SlidersIcon}
+              activeIconColor="text-text-bright"
+              inactiveIconColor="text-text-dimmed"
+              to={organizationSettingsPath(organization)}
+              data-action="settings"
+            />
+            {isManagedCloud && (
+              <>
                 <SideMenuItem
-                  name="Billing limits"
-                  icon={BellIcon}
+                  isCollapsed={isCollapsed}
+                  name="Usage"
+                  icon={UsageIcon}
                   activeIconColor="text-text-bright"
                   inactiveIconColor="text-text-dimmed"
-                  to={v3BillingLimitsPath(organization)}
-                  data-action="billing-limits"
+                  to={v3UsagePath(organization)}
+                  data-action="usage"
                 />
-              ) : null}
-            </>
-          )}
-          <SideMenuItem
-            name="Projects"
-            icon={FolderOpenIcon}
-            activeIconColor="text-text-bright"
-            inactiveIconColor="text-text-dimmed"
-            to={organizationProjectsPath(organization)}
-            data-action="projects"
-          />
-          <SideMenuItem
-            name="Team"
-            icon={UserGroupIcon}
-            activeIconColor="text-text-bright"
-            inactiveIconColor="text-text-dimmed"
-            to={organizationTeamPath(organization)}
-            data-action="team"
-          />
-          {featureFlags.hasPrivateConnections && (
+                <SideMenuItem
+                  isCollapsed={isCollapsed}
+                  name="Billing"
+                  icon={CreditCardIcon}
+                  activeIconColor="text-text-bright"
+                  inactiveIconColor="text-text-dimmed"
+                  to={v3BillingPath(organization)}
+                  data-action="billing"
+                  badge={
+                    currentPlan?.v3Subscription?.isPaying ? (
+                      <Badge variant="extra-small">
+                        {currentPlan?.v3Subscription?.plan?.title}
+                      </Badge>
+                    ) : undefined
+                  }
+                />
+                {showSelfServe ? (
+                  <SideMenuItem
+                    isCollapsed={isCollapsed}
+                    name="Billing limits"
+                    icon={BellIcon}
+                    activeIconColor="text-text-bright"
+                    inactiveIconColor="text-text-dimmed"
+                    to={v3BillingLimitsPath(organization)}
+                    data-action="billing-limits"
+                  />
+                ) : null}
+              </>
+            )}
             <SideMenuItem
-              name="Private Connections"
-              icon={ChainLinkIcon}
+              isCollapsed={isCollapsed}
+              name="Projects"
+              icon={FolderOpenIcon}
               activeIconColor="text-text-bright"
               inactiveIconColor="text-text-dimmed"
-              to={v3PrivateConnectionsPath(organization)}
-              data-action="private-connections"
+              to={organizationProjectsPath(organization)}
+              data-action="projects"
             />
-          )}
-          {isUsingPlugin && (
             <SideMenuItem
-              name="Roles"
-              icon={RolesIcon}
+              isCollapsed={isCollapsed}
+              name="Team"
+              icon={UserGroupIcon}
               activeIconColor="text-text-bright"
               inactiveIconColor="text-text-dimmed"
-              to={organizationRolesPath(organization)}
-              data-action="roles"
+              to={organizationTeamPath(organization)}
+              data-action="team"
             />
-          )}
-          {isSsoUsingPlugin && (
-            <SideMenuItem
-              name="SSO & Directory Sync"
-              icon={PadlockIcon}
-              activeIconColor="text-text-bright"
-              inactiveIconColor="text-text-dimmed"
-              to={organizationSsoPath(organization)}
-              data-action="sso"
-            />
-          )}
-          {/* Same rule as the page: flag on, or the org already requires requests. */}
-          {isManagedCloud &&
-            (featureFlags.supportAccessSettingsEnabled === true ||
-              organization.supportAccessMode === "REQUIRES_REQUEST") && (
+            {featureFlags.hasPrivateConnections && (
               <SideMenuItem
-                name="Support Access"
-                icon={ShieldIcon}
+                isCollapsed={isCollapsed}
+                name="Private Connections"
+                icon={ChainLinkIcon}
                 activeIconColor="text-text-bright"
                 inactiveIconColor="text-text-dimmed"
-                to={organizationSupportAccessPath(organization)}
-                data-action="support-access"
+                to={v3PrivateConnectionsPath(organization)}
+                data-action="private-connections"
               />
             )}
-        </div>
-        <div className="flex flex-col">
-          <div className="mb-1">
-            <SideMenuHeader title="Integrations" />
+            {isUsingPlugin && (
+              <SideMenuItem
+                isCollapsed={isCollapsed}
+                name="Roles"
+                icon={RolesIcon}
+                activeIconColor="text-text-bright"
+                inactiveIconColor="text-text-dimmed"
+                to={organizationRolesPath(organization)}
+                data-action="roles"
+              />
+            )}
+            {isSsoUsingPlugin && (
+              <SideMenuItem
+                isCollapsed={isCollapsed}
+                name="SSO & Directory Sync"
+                icon={PadlockIcon}
+                activeIconColor="text-text-bright"
+                inactiveIconColor="text-text-dimmed"
+                to={organizationSsoPath(organization)}
+                data-action="sso"
+              />
+            )}
+            {/* Same rule as the page: flag on, or the org already requires requests. */}
+            {isManagedCloud &&
+              (featureFlags.supportAccessSettingsEnabled === true ||
+                organization.supportAccessMode === "REQUIRES_REQUEST") && (
+                <SideMenuItem
+                  isCollapsed={isCollapsed}
+                  name="Support Access"
+                  icon={ShieldIcon}
+                  activeIconColor="text-text-bright"
+                  inactiveIconColor="text-text-dimmed"
+                  to={organizationSupportAccessPath(organization)}
+                  data-action="support-access"
+                />
+              )}
           </div>
-          <SideMenuItem
-            name="Vercel"
-            icon={VercelLogo}
-            activeIconColor="text-text-bright"
-            inactiveIconColor="text-text-dimmed"
-            iconClassName="size-4 ml-[0.15rem]"
-            to={organizationVercelIntegrationPath(organization)}
-            data-action="integrations"
-          />
-          <SideMenuItem
-            name="Slack"
-            icon={SlackIcon}
-            activeIconColor="text-text-bright"
-            inactiveIconColor="text-text-dimmed"
-            iconClassName="size-4 ml-0.5"
-            to={organizationSlackIntegrationPath(organization)}
-            data-action="integrations"
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <SideMenuHeader title="App version" />
-          <Paragraph variant="extra-small" className="px-2 text-text-dimmed">
-            {buildInfo.appVersion || `v${buildInfo.packageVersion}`}
-          </Paragraph>
-        </div>
-        {showBuildInfo && buildInfo.buildTimestampSeconds && (
-          <div className="flex flex-col gap-1">
-            <SideMenuHeader title="Build timestamp" />
-            <Paragraph variant="extra-small" className="px-2 text-text-dimmed">
-              {new Date(Number(buildInfo.buildTimestampSeconds) * 1000).toISOString()}
+          <div className="flex flex-col">
+            <div className="mb-1">
+              <SideMenuHeader isCollapsed={isCollapsed} title="Integrations" />
+            </div>
+            <SideMenuItem
+              isCollapsed={isCollapsed}
+              name="Vercel"
+              icon={VercelLogo}
+              activeIconColor="text-text-bright"
+              inactiveIconColor="text-text-dimmed"
+              to={organizationVercelIntegrationPath(organization)}
+              data-action="integrations"
+            />
+            <SideMenuItem
+              isCollapsed={isCollapsed}
+              name="Slack"
+              icon={SlackIcon}
+              activeIconColor="text-text-bright"
+              inactiveIconColor="text-text-dimmed"
+              to={organizationSlackIntegrationPath(organization)}
+              data-action="integrations"
+            />
+          </div>
+          <div
+            className="flex flex-col gap-1"
+            hidden={isCollapsed}
+            style={{ opacity: "var(--sm-label-opacity, 1)" }}
+          >
+            <SideMenuHeader isCollapsed={isCollapsed} title="App version" />
+            <Paragraph variant="extra-small" className="break-words px-2 text-xs text-text-dimmed">
+              {buildInfo.appVersion || `v${buildInfo.packageVersion}`}
             </Paragraph>
           </div>
-        )}
-        {showBuildInfo && buildInfo.gitRefName && (
-          <div className="flex flex-col gap-1">
-            <SideMenuHeader title="Git ref" />
-            <Paragraph variant="extra-small" className="px-2 text-text-dimmed">
-              <a
-                href={`https://github.com/triggerdotdev/trigger.dev/tree/${buildInfo.gitRefName}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition hover:text-text-bright"
+          {showBuildInfo && buildInfo.buildTimestampSeconds && (
+            <div
+              className="flex flex-col gap-1"
+              hidden={isCollapsed}
+              style={{ opacity: "var(--sm-label-opacity, 1)" }}
+            >
+              <SideMenuHeader isCollapsed={isCollapsed} title="Build timestamp" />
+              <Paragraph
+                variant="extra-small"
+                className="break-words px-2 text-xs text-text-dimmed"
               >
-                {buildInfo.gitRefName}
-              </a>
-            </Paragraph>
-          </div>
-        )}
-        {showBuildInfo && buildInfo.gitSha && (
-          <div className="flex flex-col gap-1">
-            <SideMenuHeader title="Git sha" />
-            <Paragraph variant="extra-small" className="px-2 text-text-dimmed">
-              <a
-                href={`https://github.com/triggerdotdev/trigger.dev/commit/${buildInfo.gitSha}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition hover:text-text-bright"
+                {new Date(Number(buildInfo.buildTimestampSeconds) * 1000).toISOString()}
+              </Paragraph>
+            </div>
+          )}
+          {showBuildInfo && buildInfo.gitRefName && (
+            <div
+              className="flex flex-col gap-1"
+              hidden={isCollapsed}
+              style={{ opacity: "var(--sm-label-opacity, 1)" }}
+            >
+              <SideMenuHeader isCollapsed={isCollapsed} title="Git ref" />
+              <Paragraph
+                variant="extra-small"
+                className="break-words px-2 text-xs text-text-dimmed"
               >
-                {buildInfo.gitSha.slice(0, 9)}
-              </a>
-            </Paragraph>
-          </div>
-        )}
-      </div>
-      <div className="flex w-full items-center justify-between border-t border-grid-bright p-1">
-        <HelpAndFeedback organizationId={organization.id} />
-      </div>
-    </div>
+                <a
+                  href={`https://github.com/triggerdotdev/trigger.dev/tree/${buildInfo.gitRefName}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition hover:text-text-bright"
+                >
+                  {buildInfo.gitRefName}
+                </a>
+              </Paragraph>
+            </div>
+          )}
+          {showBuildInfo && buildInfo.gitSha && (
+            <div
+              className="flex flex-col gap-1"
+              hidden={isCollapsed}
+              style={{ opacity: "var(--sm-label-opacity, 1)" }}
+            >
+              <SideMenuHeader isCollapsed={isCollapsed} title="Git sha" />
+              <Paragraph
+                variant="extra-small"
+                className="break-words px-2 text-xs text-text-dimmed"
+              >
+                <a
+                  href={`https://github.com/triggerdotdev/trigger.dev/commit/${buildInfo.gitSha}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition hover:text-text-bright"
+                >
+                  {buildInfo.gitSha.slice(0, 9)}
+                </a>
+              </Paragraph>
+            </div>
+          )}
+        </>
+      )}
+    </SettingsSideMenu>
   );
 }

@@ -101,7 +101,7 @@ export function FavoriteMenuItem({
                 "opacity-0 group-hover/menuitem:opacity-100 data-[state=open]:opacity-100"
               )}
             >
-              <EllipsisHorizontalIcon className="size-4" />
+              <EllipsisHorizontalIcon className="size-4.5" />
             </PopoverCustomTrigger>
             <PopoverContent
               className="w-fit min-w-36 p-1"
@@ -168,7 +168,7 @@ function FavoriteRenameRow({
 
   return (
     <div className="flex h-8 w-full items-center gap-2 rounded bg-background-hover pl-1.75 pr-2">
-      <Icon icon={icon} className={cn("size-5 shrink-0 text-text-dimmed", iconClassName)} />
+      <Icon icon={icon} className={cn("size-4.5 shrink-0 text-text-dimmed", iconClassName)} />
       <input
         ref={inputRef}
         autoFocus

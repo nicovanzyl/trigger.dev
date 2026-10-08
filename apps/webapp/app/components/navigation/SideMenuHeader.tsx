@@ -30,7 +30,7 @@ export function SideMenuHeader({
 
   return (
     <motion.div
-      className="group/side-header flex h-4 items-center justify-between overflow-hidden pl-1.5"
+      className="group/side-header flex h-4 items-center justify-between overflow-hidden pl-2"
       initial={false}
       animate={{
         opacity: hasCollapsedTitle ? 1 : isCollapsed ? 0 : 1,
