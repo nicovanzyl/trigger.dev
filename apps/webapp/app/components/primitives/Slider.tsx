@@ -9,7 +9,7 @@ const variants = {
   settings: {
     container: "h-6 gap-1 rounded-sm px-1",
     icons: "h-4 w-4 text-text-bright",
-    root: "h-4 grow",
+    root: "h-6 grow",
     track: "h-1 bg-grid-bright",
     range: "bg-transparent",
     // #f4f4f6 (white/charcoal-100 midpoint) is opaque on purpose: a half-alpha
@@ -23,7 +23,7 @@ const variants = {
   tertiary: {
     container: "h-6 gap-1 rounded-sm hover:bg-background-raised px-1",
     icons: "h-4 w-4 text-text-bright",
-    root: "h-4",
+    root: "h-6",
     track: "h-1 bg-grid-bright group-hover:bg-background-dimmed",
     range: "bg-transparent group-hover:bg-secondary",
     thumb: "h-3 w-3 border-2 border-text-dimmed bg-grid-bright",
@@ -39,7 +39,7 @@ export type SliderProps = ComponentProps<typeof RadixSlider.Root> & {
   LeadingIcon?: RenderIcon;
   TrailingIcon?: RenderIcon;
   variant: VariantName;
-  /** Label above the thumb while hovered or dragged. Reads `value`, so pass one. */
+  /** Label above the thumb while hovered, dragged, or keyboard-focused. */
   valueTooltip?: (value: number) => string;
   /** Values to tick on the track, e.g. the setting's default. */
   marks?: SliderMark[];
@@ -65,6 +65,13 @@ export function Slider({
 }: SliderProps) {
   const variation = variants[variant];
   const [isDragging, setIsDragging] = useState(false);
+  // Radix prevents pointer focus defaults, which can preserve :focus-visible
+  // from the previously keyboard-focused control after a drag.
+  const [isPointerFocused, setIsPointerFocused] = useState(false);
+  const [uncontrolledValue, setUncontrolledValue] = useState(
+    props.defaultValue ?? [props.min ?? 0]
+  );
+  const value = props.value ?? uncontrolledValue;
 
   /* Root's onPointerUp only fires if the release lands back on the slider, so
      watch the window while a drag is in progress. */
@@ -73,21 +80,19 @@ export function Slider({
     const stop = () => setIsDragging(false);
     window.addEventListener("pointerup", stop);
     window.addEventListener("pointercancel", stop);
+    window.addEventListener("blur", stop);
     return () => {
       window.removeEventListener("pointerup", stop);
       window.removeEventListener("pointercancel", stop);
+      window.removeEventListener("blur", stop);
     };
   }, [isDragging]);
-  const currentValue = props.value?.[0] ?? props.defaultValue?.[0] ?? 0;
+  const currentValue = value[0] ?? props.min ?? 0;
   const min = props.min ?? 0;
   const max = props.max ?? 100;
 
   return (
-    <div
-      className={cn("group flex items-center", variation.container)}
-      // Radix holds pointer capture mid-drag, so this can't fire during one.
-      onPointerLeave={() => setIsDragging(false)}
-    >
+    <div className={cn("group flex items-center", variation.container)}>
       {LeadingIcon && <Icon icon={LeadingIcon} className={variation.icons} />}
       <RadixSlider.Root
         className={cn(
@@ -96,9 +101,24 @@ export function Slider({
           className
         )}
         {...props}
+        value={value}
+        onValueChange={(nextValue) => {
+          if (props.value === undefined) setUncontrolledValue(nextValue);
+          props.onValueChange?.(nextValue);
+        }}
         onPointerDown={(event) => {
           props.onPointerDown?.(event);
+          if (props.disabled || event.button !== 0 || !event.isPrimary) {
+            event.preventDefault();
+            return;
+          }
+          if (event.defaultPrevented) return;
+          setIsPointerFocused(true);
           setIsDragging(true);
+        }}
+        onKeyDown={(event) => {
+          props.onKeyDown?.(event);
+          setIsPointerFocused(false);
         }}
         onPointerUp={(event) => {
           props.onPointerUp?.(event);
@@ -106,6 +126,10 @@ export function Slider({
         }}
         onPointerCancel={(event) => {
           props.onPointerCancel?.(event);
+          setIsDragging(false);
+        }}
+        onLostPointerCapture={(event) => {
+          props.onLostPointerCapture?.(event);
           setIsDragging(false);
         }}
       >
@@ -144,10 +168,17 @@ export function Slider({
                 <button
                   type="button"
                   aria-label={mark.label}
-                  className={cn(markClassName, "cursor-pointer", variation.markHover)}
+                  disabled={props.disabled}
+                  className={cn(
+                    markClassName,
+                    "cursor-pointer after:absolute after:-inset-x-2 after:-inset-y-1 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-text-bright disabled:cursor-not-allowed",
+                    !props.disabled && variation.markHover
+                  )}
                   style={style}
                   // Or Radix reads the press as a track click and drags the thumb.
                   onPointerDown={(event) => event.stopPropagation()}
+                  // Arrow/Home/End keys on the reset button must not move the thumb.
+                  onKeyDown={(event) => event.stopPropagation()}
                   onClick={mark.onSelect}
                 />
               }
@@ -156,20 +187,27 @@ export function Slider({
         })}
         <RadixSlider.Thumb
           aria-label={ariaLabel}
+          aria-labelledby={props["aria-labelledby"]}
+          aria-valuetext={props["aria-valuetext"] ?? valueTooltip?.(currentValue)}
+          onBlur={() => setIsPointerFocused(false)}
           className={cn(
-            "group/thumb relative block cursor-pointer rounded-full transition focus:outline-hidden",
+            "group/thumb relative block cursor-grab rounded-full after:absolute after:-inset-2 transition-colors data-disabled:cursor-not-allowed",
+            isPointerFocused
+              ? "focus:outline-hidden"
+              : "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-text-bright",
+            isDragging && !props.disabled && "cursor-grabbing",
             variation.thumb
           )}
         >
-          {valueTooltip && (
+          {valueTooltip && !props.disabled && (
             <span
+              aria-hidden
               className={cn(
                 "pointer-events-none absolute bottom-full left-1/2 mb-2.5 -translate-x-1/2 rounded border border-grid-bright bg-background-bright px-1.5 py-0.5 text-xs tabular-nums text-text-bright shadow-md transition-opacity",
                 // focus-visible, not focus: a click leaves the thumb focused,
                 // which would strand the label on screen.
-                isDragging
-                  ? "opacity-100"
-                  : "opacity-0 group-hover/thumb:opacity-100 group-focus-visible/thumb:opacity-100"
+                isDragging ? "opacity-100" : "opacity-0 group-hover/thumb:opacity-100",
+                !isPointerFocused && "group-focus-visible/thumb:opacity-100"
               )}
             >
               {valueTooltip(currentValue)}
