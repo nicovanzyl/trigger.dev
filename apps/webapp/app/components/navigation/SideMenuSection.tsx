@@ -73,6 +73,7 @@ export function SideMenuSection({
           <div className="flex items-center gap-1 text-text-dimmed group-hover/sectionheader:text-text-bright">
             <h2 className="whitespace-nowrap text-xs">{title}</h2>
             <motion.div
+              className="opacity-0 group-hover/sectionheader:opacity-100 group-focus-visible/section:opacity-100"
               initial={isCollapsed}
               animate={{ rotate: isCollapsed ? -90 : 0 }}
               transition={{ duration: 0.2 }}
