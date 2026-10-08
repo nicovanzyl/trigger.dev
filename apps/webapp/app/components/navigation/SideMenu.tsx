@@ -858,7 +858,7 @@ export function SideMenu({
         >
           <div className="w-full space-y-1">
             <SideMenuHeader title={"Project"} isCollapsed={isCollapsed} collapsedTitle="Proj" />
-            <div className="space-y-1">
+            <div>
               <ProjectSelector
                 organization={organization}
                 project={project}
